@@ -1,33 +1,40 @@
-import {GameObject} from "../../GameObject.js";
-import {Input} from "../../Input.js";
-import {Camera} from "../../Camera.js";
-import {Inventory} from "../Inventory/Inventory.js";
-import {events} from "../../Events.js";
-import {SpriteTextString} from "../SpriteTextString/SpriteTextString.js";
-import {storyFlags} from "../../StoryFlags.js";
+import { GameObject } from "../../GameObject.js";
+import { Input } from "../../Input.js";
+import { Camera } from "../../Camera.js";
+import { Inventory } from "../Inventory/Inventory.js";
+import { events } from "../../Events.js";
+import { SpriteTextString } from "../SpriteTextString/SpriteTextString.js";
+import { storyFlags } from "../../StoryFlags.js";
+import { MultiplayerManager } from "../../client/MultiplayerManager.js";
+import { RemoteHero } from "../Hero/RemoteHero.js";
 
 export class Main extends GameObject {
   constructor() {
     super({});
     this.level = null;
-    this.input = new Input()
-    this.camera = new Camera()
+    this.input = new Input();
+    this.camera = new Camera();
+
+    // Multiplayer
+    this.multiplayerManager = new MultiplayerManager();
+    this.remotePlayers = new Map(); // playerId -> RemoteHero instance
   }
 
   ready() {
 
-    const inventory = new Inventory()
+    const inventory = new Inventory();
     this.addChild(inventory);
+
+    // Initialize multiplayer
+    this.setupMultiplayer();
 
     // Change Level handler
     events.on("CHANGE_LEVEL", this, newLevelInstance => {
-      this.setLevel(newLevelInstance)
-    })
+      this.setLevel(newLevelInstance);
+    });
 
     // Launch Text Box handler
     events.on("HERO_REQUESTS_ACTION", this, (withObject) => {
-
-
       if (typeof withObject.getContent === "function") {
         const content = withObject.getContent();
 
@@ -35,10 +42,10 @@ export class Main extends GameObject {
           return;
         }
 
-        console.log(content)
+        console.log(content);
         // Potentially add a story flag
         if (content.addsFlag) {
-          console.log("ADD FLAG", content.addsFlag)
+          console.log("ADD FLAG", content.addsFlag);
           storyFlags.add(content.addsFlag);
         }
 
@@ -53,12 +60,57 @@ export class Main extends GameObject {
         // Unsubscribe from this text box after it's destroyed
         const endingSub = events.on("END_TEXT_BOX", this, () => {
           textbox.destroy();
-          events.off(endingSub)
-        })
+          events.off(endingSub);
+        });
+      }
+    });
+  }
+
+  setupMultiplayer() {
+    // Connect to server
+    this.multiplayerManager.connect();
+
+    // Listen for local hero state updates and send to server
+    events.on("HERO_STATE_UPDATE", this, (data) => {
+      this.multiplayerManager.sendPlayerUpdate(data);
+    });
+
+    // When a remote player joins
+    events.on("REMOTE_PLAYER_JOINED", this, (playerData) => {
+      console.log("Adding remote player:", playerData.id);
+
+      const remoteHero = new RemoteHero(
+        playerData.id,
+        playerData.x,
+        playerData.y
+      );
+
+      // Add to level if it exists
+      if (this.level) {
+        this.level.addChild(remoteHero);
       }
 
-    })
+      // Track it
+      this.remotePlayers.set(playerData.id, remoteHero);
+    });
 
+    // When a remote player moves
+    events.on("REMOTE_PLAYER_MOVED", this, (data) => {
+      const remoteHero = this.remotePlayers.get(data.id);
+      if (remoteHero) {
+        remoteHero.updateFromNetwork(data);
+      }
+    });
+
+    // When a remote player leaves
+    events.on("REMOTE_PLAYER_LEFT", this, (playerId) => {
+      console.log("Removing remote player:", playerId);
+      const remoteHero = this.remotePlayers.get(playerId);
+      if (remoteHero) {
+        remoteHero.destroy();
+        this.remotePlayers.delete(playerId);
+      }
+    });
   }
 
   setLevel(newLevelInstance) {
@@ -67,10 +119,15 @@ export class Main extends GameObject {
     }
     this.level = newLevelInstance;
     this.addChild(this.level);
+
+    // Re-add all remote players to the new level
+    this.remotePlayers.forEach(remoteHero => {
+      this.level.addChild(remoteHero);
+    });
   }
 
   drawBackground(ctx) {
-    this.level?.background.drawImage(ctx,0,0);
+    this.level?.background.drawImage(ctx, 0, 0);
   }
 
   drawObjects(ctx) {
@@ -78,7 +135,7 @@ export class Main extends GameObject {
       if (child.drawLayer !== "HUD") {
         child.draw(ctx, 0, 0);
       }
-    })
+    });
   }
 
   drawForeground(ctx) {
@@ -86,7 +143,6 @@ export class Main extends GameObject {
       if (child.drawLayer === "HUD") {
         child.draw(ctx, 0, 0);
       }
-    })
+    });
   }
-
 }

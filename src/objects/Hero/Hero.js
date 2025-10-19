@@ -1,11 +1,12 @@
-import {GameObject} from "../../GameObject.js";
-import {Vector2} from "../../Vector2.js";
-import {DOWN, LEFT, RIGHT, UP} from "../../Input.js";
-import {gridCells, isSpaceFree} from "../../helpers/grid.js";
-import {Sprite} from "../../Sprite.js";
-import {resources} from "../../Resource.js";
-import {Animations} from "../../Animations.js";
-import {FrameIndexPattern} from "../../FrameIndexPattern.js";
+import { GameObject } from "../../GameObject.js";
+import { Vector2 } from "../../Vector2.js";
+import { DOWN, LEFT, RIGHT, UP } from "../../Input.js";
+import { gridCells, isSpaceFree } from "../../helpers/grid.js";
+import { Sprite } from "../../Sprite.js";
+import { resources } from "../../Resource.js";
+import { Animations } from "../../Animations.js";
+import { HeroAttributes } from "./HeroAttributes.js";
+import { FrameIndexPattern } from "../../FrameIndexPattern.js";
 import {
   PICK_UP_DOWN,
   STAND_DOWN,
@@ -17,15 +18,15 @@ import {
   WALK_RIGHT,
   WALK_UP
 } from "./heroAnimations.js";
-import {moveTowards} from "../../helpers/moveTowards.js";
-import {events} from "../../Events.js";
+import { moveTowards } from "../../helpers/moveTowards.js";
+import { events } from "../../Events.js";
 
 export class Hero extends GameObject {
   constructor(x, y) {
     super({
       position: new Vector2(x, y)
     });
-
+    
     const shadow = new Sprite({
       resource: resources.images.shadow,
       frameSize: new Vector2(32, 32),
@@ -35,7 +36,7 @@ export class Hero extends GameObject {
 
     this.body = new Sprite({
       resource: resources.images.hero,
-      frameSize: new Vector2(32,32),
+      frameSize: new Vector2(32, 32),
       hFrames: 3,
       vFrames: 8,
       frame: 1,
@@ -59,6 +60,11 @@ export class Hero extends GameObject {
     this.itemPickupTime = 0;
     this.itemPickupShell = null;
     this.isLocked = false;
+    this.isSolid = true;
+    this.attributes = new HeroAttributes();
+
+    // Track current animation for multiplayer
+    this.currentAnimation = 'standDown';
 
     // React to picking up an item
     events.on("HERO_PICKS_UP_ITEM", this, data => {
@@ -117,18 +123,36 @@ export class Hero extends GameObject {
     }
     this.lastX = this.position.x;
     this.lastY = this.position.y;
-    events.emit("HERO_POSITION", this.position)
+    events.emit("HERO_POSITION", this.position);
+
+    // Broadcast to multiplayer
+    this.broadcastState();
   }
 
   tryMove(root) {
-    const {input} = root;
+    const { input } = root;
 
     if (!input.direction) {
 
-      if (this.facingDirection === LEFT) { this.body.animations.play("standLeft")}
-      if (this.facingDirection === RIGHT) { this.body.animations.play("standRight")}
-      if (this.facingDirection === UP) { this.body.animations.play("standUp")}
-      if (this.facingDirection === DOWN) { this.body.animations.play("standDown")}
+      if (this.facingDirection === LEFT) {
+        this.body.animations.play("standLeft");
+        this.currentAnimation = 'standLeft';
+      }
+      if (this.facingDirection === RIGHT) {
+        this.body.animations.play("standRight");
+        this.currentAnimation = 'standRight';
+      }
+      if (this.facingDirection === UP) {
+        this.body.animations.play("standUp");
+        this.currentAnimation = 'standUp';
+      }
+      if (this.facingDirection === DOWN) {
+        this.body.animations.play("standDown");
+        this.currentAnimation = 'standDown';
+      }
+
+      // Broadcast animation change
+      this.broadcastState();
 
       return;
     }
@@ -140,20 +164,27 @@ export class Hero extends GameObject {
     if (input.direction === DOWN) {
       nextY += gridSize;
       this.body.animations.play("walkDown");
+      this.currentAnimation = 'walkDown';
+      this.facingDirection = DOWN;
     }
     if (input.direction === UP) {
       nextY -= gridSize;
       this.body.animations.play("walkUp");
+      this.currentAnimation = 'walkUp';
+      this.facingDirection = UP;
     }
     if (input.direction === LEFT) {
       nextX -= gridSize;
       this.body.animations.play("walkLeft");
+      this.currentAnimation = 'walkLeft';
+      this.facingDirection = LEFT;
     }
     if (input.direction === RIGHT) {
       nextX += gridSize;
       this.body.animations.play("walkRight");
+      this.currentAnimation = 'walkRight';
+      this.facingDirection = RIGHT;
     }
-    this.facingDirection = input.direction ?? this.facingDirection;
 
     // Validating that the next destination is free
     const spaceIsFree = isSpaceFree(root.level?.walls, nextX, nextY);
@@ -164,6 +195,9 @@ export class Hero extends GameObject {
       this.destinationPosition.x = nextX;
       this.destinationPosition.y = nextY;
     }
+
+    // Broadcast animation change immediately
+    this.broadcastState();
   }
 
   onPickUpItem({ image, position }) {
@@ -179,6 +213,11 @@ export class Hero extends GameObject {
       position: new Vector2(0, -18)
     }))
     this.addChild(this.itemPickupShell);
+
+    // Test attributes transmition
+    this.attributes.set('health', "100");
+    this.broadcastState(); // Send update to server
+    console.log(this.attributes.getAll());
   }
 
   workOnItemPickup(delta) {
@@ -189,8 +228,16 @@ export class Hero extends GameObject {
     if (this.itemPickupTime <= 0) {
       this.itemPickupShell.destroy();
     }
-
   }
 
-
+  // Broadcast state to server
+  broadcastState() {
+    events.emit("HERO_STATE_UPDATE", {
+      x: this.position.x,
+      y: this.position.y,
+      animation: this.currentAnimation,
+      facingDirection: this.facingDirection,
+      attributes: this.attributes.getAll()
+    });
+  }
 }
