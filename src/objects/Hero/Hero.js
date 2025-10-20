@@ -216,7 +216,7 @@ export class Hero extends GameObject {
 
     // Test attributes transmition
     this.attributes.set('health', "100");
-    this.broadcastState(); // Send update to server
+    this.broadcastAttributes(); // Send update to server
     console.log(this.attributes.getAll());
   }
 
@@ -237,6 +237,13 @@ export class Hero extends GameObject {
       y: this.position.y,
       animation: this.currentAnimation,
       facingDirection: this.facingDirection,
+      attributes: this.attributes.getAll()
+    });
+  }
+
+  // Separate event for attributes only
+  broadcastAttributes() {
+    events.emit("HERO_ATTRIBUTES_UPDATE", {
       attributes: this.attributes.getAll()
     });
   }

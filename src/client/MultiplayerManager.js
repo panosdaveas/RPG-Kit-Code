@@ -50,12 +50,22 @@ export class MultiplayerManager {
             this.isConnected = false;
             events.emit('MULTIPLAYER_DISCONNECTED');
         });
+
+        this.socket.on('player-attributes-changed', (data) => {
+            events.emit('REMOTE_PLAYER_ATTRIBUTES_CHANGED', data);
+        });
     }
 
     // Send local player state to server
     sendPlayerUpdate(data) {
         if (this.isConnected && this.socket) {
             this.socket.emit('player-update', data);
+        }
+    }
+
+    sendAttributeUpdate(data) {
+        if (this.isConnected && this.socket) {
+            this.socket.emit('attribute-update', data);
         }
     }
 

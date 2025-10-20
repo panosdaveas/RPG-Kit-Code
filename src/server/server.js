@@ -55,6 +55,20 @@ io.on('connection', (socket) => {
         });
     });
 
+    // Update stored player attributes
+    socket.on('attribute-update', (data) => {
+        const player = players.get(socket.id);
+        if (player) {
+            player.attributes = data.attributes;
+        }
+
+        // Broadcast to others
+        socket.broadcast.emit('player-attributes-changed', {
+            id: socket.id,
+            attributes: data.attributes
+        });
+    });
+
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('Player disconnected:', socket.id);

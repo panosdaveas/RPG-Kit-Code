@@ -75,6 +75,18 @@ export class Main extends GameObject {
       this.multiplayerManager.sendPlayerUpdate(data);
     });
 
+    // listener for attributes
+    events.on("HERO_ATTRIBUTES_UPDATE", this, (data) => {
+      this.multiplayerManager.sendAttributeUpdate(data);
+    });
+
+    events.on("REMOTE_PLAYER_ATTRIBUTES_CHANGED", this, (data) => {
+      const remoteHero = this.remotePlayers.get(data.id);
+      if (remoteHero) {
+        remoteHero.attributes.setMultiple(data.attributes);
+      }
+    });
+
     // When a remote player joins
     events.on("REMOTE_PLAYER_JOINED", this, (playerData) => {
       console.log("Adding remote player:", playerData.id);
