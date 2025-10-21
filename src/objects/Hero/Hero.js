@@ -62,6 +62,7 @@ export class Hero extends GameObject {
     this.isLocked = false;
     this.isSolid = true;
     this.attributes = new HeroAttributes();
+    this.currentLevelId = null;
 
     // Track current animation for multiplayer
     this.currentAnimation = 'standDown';
@@ -237,7 +238,8 @@ export class Hero extends GameObject {
       y: this.position.y,
       animation: this.currentAnimation,
       facingDirection: this.facingDirection,
-      attributes: this.attributes.getAll()
+      attributes: this.attributes.getAll(),
+      levelId: this.currentLevelId
     });
   }
 

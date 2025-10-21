@@ -14,6 +14,10 @@ const DEFAULT_HERO_POSITION = new Vector2(gridCells(6),gridCells(5))
 export class OutdoorLevel1 extends Level {
   constructor(params={}) {
     super({});
+
+    this.levelId = "outdoor";
+    this.multiplayerEnabled = true; // render or not remote players here
+
     this.background = new Sprite({
       resource: resources.images.sky,
       frameSize: new Vector2(320, 180)

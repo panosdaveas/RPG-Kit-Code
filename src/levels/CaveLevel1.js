@@ -17,6 +17,9 @@ export class CaveLevel1 extends Level {
   constructor(params={}) {
     super({});
 
+    this.levelId = "cave";
+    this.multiplayerEnabled = true; // render remote players here
+
     this.background = new Sprite({
       resource: resources.images.cave,
       frameSize: new Vector2(320, 180)

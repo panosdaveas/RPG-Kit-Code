@@ -97,13 +97,10 @@ export class Main extends GameObject {
         playerData.y
       );
 
-      // Add to level if it exists
-      if (this.level) {
-        this.level.addChild(remoteHero);
-      }
-
-      // Track it
+      remoteHero.currentLevelId = playerData.levelId;
       this.remotePlayers.set(playerData.id, remoteHero);
+
+      this.updateRemoteHeroVisibility(remoteHero); // USE HELPER
     });
 
     // When a remote player moves
@@ -111,6 +108,7 @@ export class Main extends GameObject {
       const remoteHero = this.remotePlayers.get(data.id);
       if (remoteHero) {
         remoteHero.updateFromNetwork(data);
+        this.updateRemoteHeroVisibility(remoteHero); // USE HELPER
       }
     });
 
@@ -119,13 +117,18 @@ export class Main extends GameObject {
       console.log("Removing remote player:", playerId);
       const remoteHero = this.remotePlayers.get(playerId);
       if (remoteHero) {
-        remoteHero.destroy();
+        // Only destroy if it has a parent
+        if (remoteHero.parent) {
+          remoteHero.destroy();
+        }
+        // Always remove from the map
         this.remotePlayers.delete(playerId);
       }
     });
   }
 
   setLevel(newLevelInstance) {
+    // Remove remote players from old level first
     if (this.level) {
       this.remotePlayers.forEach(remoteHero => {
         if (remoteHero.parent === this.level) {
@@ -135,14 +138,38 @@ export class Main extends GameObject {
       });
       this.level.destroy();
     }
+
     this.level = newLevelInstance;
     this.addChild(this.level);
 
-    // Re-add all remote players to the new level
-    this.remotePlayers.forEach(remoteHero => {
-      this.level.addChild(remoteHero);
-    });
+    // Update local hero's current level and broadcast it
+    const hero = this.level.children.find(c => c.constructor.name === 'Hero');
+    if (hero) {
+      hero.currentLevelId = this.level.levelId;
+      hero.broadcastState();
+    }
 
+    // Update visibility for all remote players
+    this.remotePlayers.forEach(remoteHero => {
+      this.updateRemoteHeroVisibility(remoteHero); // USE HELPER
+    });
+  }
+
+  // Add this new helper method in the Main class (after setupMultiplayer or wherever you prefer):
+  updateRemoteHeroVisibility(remoteHero) {
+    // Check if multiplayer is disabled on this level
+    const levelAllowsMultiplayer = this.level.multiplayerEnabled !== false;
+
+    const shouldBeInLevel = levelAllowsMultiplayer &&
+      (remoteHero.currentLevelId === this.level.levelId);
+    const isInLevel = (remoteHero.parent === this.level);
+
+    if (shouldBeInLevel && !isInLevel) {
+      this.level.addChild(remoteHero);
+    } else if (!shouldBeInLevel && isInLevel) {
+      this.level.children = this.level.children.filter(c => c !== remoteHero);
+      remoteHero.parent = null;
+    }
   }
 
   drawBackground(ctx) {

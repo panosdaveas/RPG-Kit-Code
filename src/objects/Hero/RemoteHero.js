@@ -25,6 +25,7 @@ export class RemoteHero extends GameObject {
         this.isSolid = true;
         this.attributes = new HeroAttributes();
         this.playerId = playerId;
+        this.currentLevelId = null;
 
         // Shadow
         const shadow = new Sprite({
@@ -74,6 +75,10 @@ export class RemoteHero extends GameObject {
 
         if (data.attributes) {
             this.attributes.setMultiple(data.attributes);
+        }
+
+        if (data.levelId !== undefined) {
+            this.currentLevelId = data.levelId; // ADD THIS
         }
     }
 }

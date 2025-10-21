@@ -27,7 +27,8 @@ io.on('connection', (socket) => {
         y: 80,
         animation: 'standDown',
         facingDirection: 'DOWN',
-        attributes: {} // Empty attributes initially
+        attributes: {}, // Empty attributes initially
+        levelId: 'cave'
     });
 
     // Notify all other players about the new player
@@ -37,7 +38,8 @@ io.on('connection', (socket) => {
         y: 80,
         animation: 'standDown',
         facingDirection: 'DOWN',
-        attributes: {} // Empty attributes initially
+        attributes: {}, // Empty attributes initially
+        levelId: 'cave'
     });
 
     // Listen for player state updates
