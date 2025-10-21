@@ -63,6 +63,13 @@ export class Main extends GameObject {
           events.off(endingSub);
         });
       }
+
+      if (withObject instanceof RemoteHero) {
+        console.log("Interacting with remote player:", withObject.playerId);
+        // Handle remote player interaction here
+        // For example, show their name, stats, trade menu, etc.
+        return;
+      }
     });
   }
 
