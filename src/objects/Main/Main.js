@@ -127,6 +127,12 @@ export class Main extends GameObject {
 
   setLevel(newLevelInstance) {
     if (this.level) {
+      this.remotePlayers.forEach(remoteHero => {
+        if (remoteHero.parent === this.level) {
+          this.level.children = this.level.children.filter(c => c !== remoteHero);
+          remoteHero.parent = null;
+        }
+      });
       this.level.destroy();
     }
     this.level = newLevelInstance;
@@ -136,6 +142,7 @@ export class Main extends GameObject {
     this.remotePlayers.forEach(remoteHero => {
       this.level.addChild(remoteHero);
     });
+
   }
 
   drawBackground(ctx) {
