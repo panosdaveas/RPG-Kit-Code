@@ -23,8 +23,8 @@ io.on('connection', (socket) => {
     // Add new player to the map
     players.set(socket.id, {
         id: socket.id,
-        x: 96, // default starting position
-        y: 80,
+        x: 560, // default starting position
+        y: 400,
         animation: 'standDown',
         facingDirection: 'DOWN',
         attributes: {}, // Empty attributes initially
@@ -34,8 +34,8 @@ io.on('connection', (socket) => {
     // Notify all other players about the new player
     socket.broadcast.emit('player-joined', {
         id: socket.id,
-        x: 96,
-        y: 80,
+        x: 560,
+        y: 400,
         animation: 'standDown',
         facingDirection: 'DOWN',
         attributes: {}, // Empty attributes initially

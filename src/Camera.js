@@ -20,6 +20,26 @@ export class Camera extends GameObject {
     })
   }
 
+  clampToMapBounds() {
+    const canvasWidth = 768;
+    const canvasHeight = 432;
+    const mapWidth = 1120;  // Your map width in pixels
+    const mapHeight = 640; // Your map height in pixels
+
+    // Only clamp if map is larger than canvas
+    if (mapWidth > canvasWidth) {
+      const minX = -(mapWidth - canvasWidth);
+      const maxX = 0;
+      this.position.x = Math.max(minX, Math.min(maxX, this.position.x));
+    }
+
+    if (mapHeight > canvasHeight) {
+      const minY = -(mapHeight - canvasHeight);
+      const maxY = 0;
+      this.position.y = Math.max(minY, Math.min(maxY, this.position.y));
+    }
+  }
+
   updateCameraWithDeadZone(heroPosition) {
     const canvasWidth = 320;
     const canvasHeight = 180;
@@ -47,6 +67,11 @@ export class Camera extends GameObject {
     } else if (heroScreenY > deadZoneBottom) {
       this.position.y -= heroScreenY - deadZoneBottom;
     }
+
+    this.clampToMapBounds();
+
+    this.position.x = Math.round(this.position.x);
+    this.position.y = Math.round(this.position.y);
   }
 
   centerPositionOnTarget(pos) {

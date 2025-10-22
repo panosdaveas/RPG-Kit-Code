@@ -180,7 +180,7 @@ export class Main extends GameObject {
   }
 
   drawBackground(ctx) {
-    this.level?.background.drawImage(ctx, 0, 0);
+    // this.level?.background.drawImage(ctx, 0, 0);
   }
 
   drawObjects(ctx) {

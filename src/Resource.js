@@ -18,10 +18,17 @@ class Resources {
       textBox: "/sprites/text-box.png",
       fontWhite: "/sprites/sprite-font-white.png",
       portraits: "/sprites/portraits-sheet.png",
+      mainMapTileset: "/tilesets/outdoor_tileset_16_x_16.png"
+    };
+
+    // JSON maps to download
+    this.toLoadJson = {
+      mainMap: "/maps/main_map_16x16.json",
     };
 
     // A bucket to keep all of our images
     this.images = {};
+    this.json = {};
 
     // Load each image
     Object.keys(this.toLoad).forEach(key => {
@@ -34,7 +41,25 @@ class Resources {
       img.onload = () => {
         this.images[key].isLoaded = true;
       }
-    })
+    });
+
+    // Load JSON files
+    Object.keys(this.toLoadJson).forEach(key => {
+      this.json[key] = {
+        data: null,
+        isLoaded: false
+      };
+
+      fetch(this.toLoadJson[key])
+        .then(response => response.json())
+        .then(data => {
+          this.json[key].data = data;
+          this.json[key].isLoaded = true;
+        })
+        .catch(err => {
+          console.error(`Failed to load JSON: ${key}`, err);
+        });
+    });
   }
 }
 
