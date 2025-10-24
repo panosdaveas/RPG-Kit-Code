@@ -8,7 +8,9 @@ import {events} from "../../Events.js";
 export class SpriteTextString extends GameObject {
   constructor(config={}) {
     super({
-      position: new Vector2(32, 108)
+      // width="768-256(portrait width) / 2" to center horizontally
+      // height="432-64(text box height)" to position above text box
+      position: new Vector2(256, 368)
     });
 
 
