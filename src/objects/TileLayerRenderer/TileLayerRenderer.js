@@ -9,14 +9,6 @@ export class TileLayerRenderer extends GameObject {
         this.isParsed = false;
     }
 
-    // ready() {
-    //     // Calculate tiles per row in tileset
-    //     if (this.tiledMap.isLoaded) {
-    //         this.tilesPerRow = Math.floor(
-    //             this.tilesetImage.width / this.tiledMap.tileWidth
-    //         );
-    //     }
-    // }
     step(delta, root) {
         // Keep checking until we successfully parse
         if (!this.isParsed && this.tiledMap.isLoaded) {

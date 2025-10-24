@@ -26,9 +26,6 @@ const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.imageSmoothingEnabled = false;
 
-  // Draw the sky
-  // mainScene.drawBackground(ctx);
-
   // Save the current state (for camera offset)
   ctx.save();
 

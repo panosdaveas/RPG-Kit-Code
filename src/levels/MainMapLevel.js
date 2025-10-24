@@ -15,7 +15,6 @@ import {TALKED_TO_A, TALKED_TO_B} from "../StoryFlags.js";
 export class MainMapLevel extends Level {
     constructor(params = {}) {
         super({});
-        // this.background = null; // Could set a background sprite here
         this.levelId = "cave";
         this.multiplayerEnabled = true; // render remote players here
 
@@ -27,7 +26,6 @@ export class MainMapLevel extends Level {
 
         this.tiledMap.parse();
         this.setupLevel(params);
-        // this.checkLoaded(params);
 
         const npc1 = new Npc(gridCells(38), gridCells(30), {
             //content: "I am the first NPC!",
@@ -69,16 +67,6 @@ export class MainMapLevel extends Level {
         const exit = new Exit(gridCells(40), gridCells(25))
         this.addChild(exit);
     }
-
-    // checkLoaded(params) {
-    //     const interval = setInterval(() => {
-    //         if (this.tiledMap.isLoaded) {
-    //             clearInterval(interval);
-    //             this.tiledMap.parse();
-    //             this.setupLevel(params);
-    //         }
-    //     }, 100);
-    // }
 
     setupLevel(params) {
         // Add tile renderer

@@ -8,11 +8,10 @@ import {events} from "../../Events.js";
 export class SpriteTextString extends GameObject {
   constructor(config={}) {
     super({
-      // width="768-256(portrait width) / 2" to center horizontally
-      // height="432-64(text box height)" to position above text box
+      // width="768(canvas width)-256(portrait width) / 2" to center horizontally
+      // height="432(canvas height)-64(text box height) - 16(bottom-margin)"
       position: new Vector2(256, 352)
     });
-
 
     // Draw on top layer
     this.drawLayer = "HUD";
