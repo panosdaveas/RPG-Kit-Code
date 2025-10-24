@@ -103,7 +103,7 @@ export class TiledMap {
 
             // Check if this tile is solid (for collision)
             const props = this.tileProperties.get(tileId);
-            if (props && props.solid) {
+            if (props && props.collide) {
                 this.walls.add(`${x},${y}`);
             }
         }

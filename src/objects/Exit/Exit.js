@@ -13,7 +13,7 @@ export class Exit extends GameObject {
       resource: resources.images.exit
     }))
 
-    this.drawLayer = "FLOOR";
+    // this.drawLayer = "FLOOR";
   }
 
   ready() {

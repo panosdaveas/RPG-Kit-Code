@@ -25659,7 +25659,7 @@
                  "id":10262,
                  "properties":[
                         {
-                         "name":"door",
+                         "name":"exit",
                          "type":"bool",
                          "value":true
                         }]
@@ -26110,7 +26110,7 @@
                  "id":11515,
                  "properties":[
                         {
-                         "name":"door",
+                         "name":"exit",
                          "type":"bool",
                          "value":false
                         }]
@@ -26155,7 +26155,7 @@
                  "id":11521,
                  "properties":[
                         {
-                         "name":"door",
+                         "name":"exit",
                          "type":"bool",
                          "value":true
                         }]
@@ -26489,7 +26489,7 @@
                  "id":12775,
                  "properties":[
                         {
-                         "name":"door",
+                         "name":"exit",
                          "type":"bool",
                          "value":false
                         }]

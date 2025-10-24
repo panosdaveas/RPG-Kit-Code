@@ -66,6 +66,10 @@ export class Hero extends GameObject {
 
     // Track current animation for multiplayer
     this.currentAnimation = 'standDown';
+    // Direction hold tracking for turn-in-place mechanic
+    this.directionHeldTime = 0;
+    this.lastDirection = null;
+    this.movementThreshold = 80; // ms - adjust this value to tune the feel
 
     // React to picking up an item
     events.on("HERO_PICKS_UP_ITEM", this, data => {
@@ -106,6 +110,21 @@ export class Hero extends GameObject {
       if (objAtPosition) {
         events.emit("HERO_REQUESTS_ACTION", objAtPosition);
       }
+    }
+
+    // Track how long direction is held
+    if (input?.direction) {
+      if (input.direction === this.lastDirection) {
+        this.directionHeldTime += delta;
+      } else {
+        // Direction changed, reset timer
+        this.directionHeldTime = 0;
+        this.lastDirection = input.direction;
+      }
+    } else {
+      // No direction held, reset
+      this.directionHeldTime = 0;
+      this.lastDirection = null;
     }
 
     const distance = moveTowards(this, this.destinationPosition, 1);
@@ -161,30 +180,40 @@ export class Hero extends GameObject {
     let nextX = this.destinationPosition.x;
     let nextY = this.destinationPosition.y;
     const gridSize = 16;
+    let intendedDirection = input.direction;
 
-    if (input.direction === DOWN) {
-      nextY += gridSize;
+    // Always update facing direction and animation immediately
+    if (intendedDirection === DOWN) {
       this.body.animations.play("walkDown");
       this.currentAnimation = 'walkDown';
       this.facingDirection = DOWN;
+      if (this.directionHeldTime >= this.movementThreshold) {
+        nextY += gridSize;
+      }
     }
-    if (input.direction === UP) {
-      nextY -= gridSize;
+    if (intendedDirection === UP) {
       this.body.animations.play("walkUp");
       this.currentAnimation = 'walkUp';
       this.facingDirection = UP;
+      if (this.directionHeldTime >= this.movementThreshold) {
+        nextY -= gridSize;
+      }
     }
-    if (input.direction === LEFT) {
-      nextX -= gridSize;
+    if (intendedDirection === LEFT) {
       this.body.animations.play("walkLeft");
       this.currentAnimation = 'walkLeft';
       this.facingDirection = LEFT;
+      if (this.directionHeldTime >= this.movementThreshold) {
+        nextX -= gridSize;
+      }
     }
-    if (input.direction === RIGHT) {
-      nextX += gridSize;
+    if (intendedDirection === RIGHT) {
       this.body.animations.play("walkRight");
       this.currentAnimation = 'walkRight';
       this.facingDirection = RIGHT;
+      if (this.directionHeldTime >= this.movementThreshold) {
+        nextX += gridSize;
+      }
     }
 
     // Validating that the next destination is free

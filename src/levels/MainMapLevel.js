@@ -10,11 +10,12 @@ import { Vector2 } from "../Vector2.js";
 import { events } from "../Events.js";
 import { gridCells } from "../helpers/grid.js";
 import { OutdoorLevel1 } from "./OutdoorLevel1.js";
+import {TALKED_TO_A, TALKED_TO_B} from "../StoryFlags.js";
 
 export class MainMapLevel extends Level {
     constructor(params = {}) {
         super({});
-        this.background = null; // Could set a background sprite here
+        // this.background = null; // Could set a background sprite here
         this.levelId = "cave";
         this.multiplayerEnabled = true; // render remote players here
 
@@ -26,17 +27,58 @@ export class MainMapLevel extends Level {
 
         this.tiledMap.parse();
         this.setupLevel(params);
+        // this.checkLoaded(params);
+
+        const npc1 = new Npc(gridCells(38), gridCells(30), {
+            //content: "I am the first NPC!",
+            content: [
+                {
+                    string: "I just can't stand that guy.",
+                    requires: [TALKED_TO_B],
+                    bypass: [TALKED_TO_A],
+                    addsFlag: TALKED_TO_A,
+                },
+                {
+                    string: "He is just the worst!",
+                    requires: [TALKED_TO_A],
+                },
+                {
+                    string: "Grumble grumble. Another day at work.",
+                    requires: [],
+                }
+            ],
+            portraitFrame: 1
+        })
+        this.addChild(npc1);
+
+        const npc2 = new Npc(gridCells(38), gridCells(28), {
+            content: [
+                {
+                    string: "What a wonderful day at work in the cave!",
+                    requires: [],
+                    addsFlag: TALKED_TO_B
+                }
+            ],
+            portraitFrame: 0
+        })
+        this.addChild(npc2);
+
+        const rod = new Rod(gridCells(37), gridCells(25))
+        this.addChild(rod);
+
+        const exit = new Exit(gridCells(40), gridCells(25))
+        this.addChild(exit);
     }
 
-    checkLoaded(params) {
-        const interval = setInterval(() => {
-            if (this.tiledMap.isLoaded) {
-                clearInterval(interval);
-                this.tiledMap.parse();
-                this.setupLevel(params);
-            }
-        }, 100);
-    }
+    // checkLoaded(params) {
+    //     const interval = setInterval(() => {
+    //         if (this.tiledMap.isLoaded) {
+    //             clearInterval(interval);
+    //             this.tiledMap.parse();
+    //             this.setupLevel(params);
+    //         }
+    //     }, 100);
+    // }
 
     setupLevel(params) {
         // Add tile renderer
@@ -62,16 +104,13 @@ export class MainMapLevel extends Level {
                 this.addChild(rod);
             }
         });
-        const rod = new Rod(gridCells(37), gridCells(25))
-        this.addChild(rod);
-
-        const exit = new Exit(gridCells(40), gridCells(25))
-        this.addChild(exit);
+        
 
         // Spawn exits
         const exits = this.tiledMap.getObjectsByType("exit");
         exits.forEach(exitObj => {
             const exit = new Exit(exitObj.x, exitObj.y);
+            console.log("Adding exit at", exitObj.x, exitObj.y);
             this.addChild(exit);
         });
 
