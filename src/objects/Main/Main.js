@@ -7,6 +7,8 @@ import { SpriteTextString } from "../SpriteTextString/SpriteTextString.js";
 import { storyFlags } from "../../StoryFlags.js";
 import { MultiplayerManager } from "../../client/MultiplayerManager.js";
 import { RemoteHero } from "../Hero/RemoteHero.js";
+import { DebugHud } from "../DebugHud/DebugHud.js";
+
 
 export class Main extends GameObject {
   constructor() {
@@ -24,6 +26,9 @@ export class Main extends GameObject {
 
     const inventory = new Inventory();
     this.addChild(inventory);
+
+    const debugHud = new DebugHud();
+    this.addChild(debugHud);
 
     // Initialize multiplayer
     this.setupMultiplayer();
