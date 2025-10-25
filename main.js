@@ -8,6 +8,11 @@ import { MainMapLevel } from './src/levels/MainMapLevel.js';
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 
+//scale for crispness
+// canvas.width = 768*2;
+// canvas.height = 432*2;
+// ctx.scale(2,2);
+
 // Establish the root scene
 const mainScene = new Main({
   position: new Vector2(0,0)
