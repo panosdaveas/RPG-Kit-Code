@@ -8,6 +8,7 @@ import { storyFlags } from "../../StoryFlags.js";
 import { MultiplayerManager } from "../../client/MultiplayerManager.js";
 import { RemoteHero } from "../Hero/RemoteHero.js";
 import { DebugHud } from "../DebugHud/DebugHud.js";
+import { ChatUI } from "../../client/ChatUI.js";
 
 
 export class Main extends GameObject {
@@ -32,6 +33,11 @@ export class Main extends GameObject {
 
     // Initialize multiplayer
     this.setupMultiplayer();
+
+    // Initialize chat UI and pass the multiplayerManager and remotePlayers reference
+    const chatUI = new ChatUI(this.multiplayerManager, this.remotePlayers);
+    chatUI.initialize();
+    this.chatUI = chatUI;
 
     // Change Level handler
     events.on("CHANGE_LEVEL", this, newLevelInstance => {
@@ -110,9 +116,15 @@ export class Main extends GameObject {
       );
 
       remoteHero.currentLevelId = playerData.levelId;
+      remoteHero.playerName = playerData.playerName || `Player_${playerData.id.substring(0, 6)}`;
       this.remotePlayers.set(playerData.id, remoteHero);
 
       this.updateRemoteHeroVisibility(remoteHero); // USE HELPER
+
+      // Update chat UI dropdown
+      if (this.chatUI) {
+        this.chatUI.updatePlayerDropdown();
+      }
     });
 
     // When a remote player moves
@@ -135,6 +147,11 @@ export class Main extends GameObject {
         }
         // Always remove from the map
         this.remotePlayers.delete(playerId);
+
+        // Update chat UI dropdown
+        if (this.chatUI) {
+          this.chatUI.updatePlayerDropdown();
+        }
       }
     });
   }
@@ -159,6 +176,8 @@ export class Main extends GameObject {
     if (hero) {
       hero.currentLevelId = this.level.levelId;
       hero.broadcastState();
+      // Notify chat system of level change
+      // this.multiplayerManager.onLevelChanged(this.level.levelId);
     }
 
     // Update visibility for all remote players

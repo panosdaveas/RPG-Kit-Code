@@ -1,15 +1,18 @@
 import { io } from 'socket.io-client';
 import { events } from '../Events.js';
+import { ChatManager } from './ChatManager.js';
 
 export class MultiplayerManager {
     constructor() {
         this.socket = null;
         this.isConnected = false;
         this.playerId = null;
+        this.chatManager = null;
     }
 
     connect(serverUrl = 'http://localhost:3000') {
         this.socket = io(serverUrl);
+        this.chatManager = new ChatManager(this.socket);
 
         // Connection established
         this.socket.on('connect', () => {
@@ -17,6 +20,7 @@ export class MultiplayerManager {
             this.isConnected = true;
             this.playerId = this.socket.id;
             events.emit('MULTIPLAYER_CONNECTED', this.playerId);
+            this.chatManager.initialize(this.playerId);
         });
 
         // Receive existing players when joining
@@ -74,4 +78,15 @@ export class MultiplayerManager {
             this.socket.disconnect();
         }
     }
+
+    // Expose method for UI/game to call
+    sendChatMessage(text, targetPlayerId = null) {
+        this.chatManager.sendMessage(text, targetPlayerId);
+    }
+
+    // Call this when level changes (hook into existing level change event)
+    onLevelChanged(newLevelId) {
+        this.chatManager.onLevelChanged(newLevelId);
+    }
+
 }

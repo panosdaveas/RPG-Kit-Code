@@ -1,6 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { ChatHandler } from './ChatHandler.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -13,6 +14,8 @@ const io = new Server(httpServer, {
 
 // Track all connected players
 const players = new Map();
+
+const chatHandler = new ChatHandler(io);
 
 io.on('connection', (socket) => {
     console.log('Player connected:', socket.id);
@@ -79,6 +82,16 @@ io.on('connection', (socket) => {
         // Notify others
         socket.broadcast.emit('player-left', socket.id);
     });
+
+    // Initialize chat handler for this socket
+    const playerName = `Player_${socket.id.substring(0, 6)}`;
+    chatHandler.handleConnection(socket, socket.id, playerName);
+
+    // When level changes (you likely already emit this)
+    socket.on('level-changed', (data) => {
+        chatHandler.updatePlayerLevel(socket.id, data.levelId);
+    });
+
 });
 
 const PORT = 3000;

@@ -37,4 +37,10 @@ class Events {
 
 }
 
+// Chat Events
+export const CHAT_MESSAGE_SENT = 'CHAT_MESSAGE_SENT';
+export const CHAT_MESSAGE_RECEIVED = 'CHAT_MESSAGE_RECEIVED';
+export const CHAT_ROOM_CHANGED = 'CHAT_ROOM_CHANGED';
+export const CHAT_TYPING_INDICATOR = 'CHAT_TYPING_INDICATOR';
+
 export const events = new Events();
