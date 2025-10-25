@@ -58,6 +58,7 @@ export class DebugHud extends GameObject {
         ctx.fillRect(x - padding, y - padding, boxWidth + padding * 2, (lineHeight * 4) + padding * 2);
 
         // Set text style
+        ctx.textRendering = "geometricPrecision";
         ctx.font = "8px fontRetroGaming";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
@@ -66,13 +67,13 @@ export class DebugHud extends GameObject {
         // Draw info lines
         let currentY = y;
 
-        ctx.fillText(`Player: ${this.playerId.substring(0, 12)}...`, x, currentY);
+        ctx.fillText(`Player: ${this.playerId.substring(0, 12)}...`, Math.floor(x), Math.floor(currentY));
         currentY += lineHeight;
 
-        ctx.fillText(`Connected Players: ${this.connectedPlayers}`, x, currentY);
+        ctx.fillText(`Connected Players: ${this.connectedPlayers}`, Math.floor(x), Math.floor(currentY));
         currentY += lineHeight;
 
-        ctx.fillText(`Multiplayer: ${this.multiplayerEnabled ? "ON" : "OFF"}`, x, currentY);
+        ctx.fillText(`Multiplayer: ${this.multiplayerEnabled ? "ON" : "OFF"}`, Math.floor(x), Math.floor(currentY));
         currentY += lineHeight;
 
         // Color-coded FPS

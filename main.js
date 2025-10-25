@@ -8,10 +8,15 @@ import { MainMapLevel } from './src/levels/MainMapLevel.js';
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 
-//scale for crispness
-// canvas.width = 768*2;
-// canvas.height = 432*2;
-// ctx.scale(2,2);
+// Get the device's pixel ratio (usually 1 on desktop, 2+ on high-DPI displays)
+const dpr = window.devicePixelRatio || 1;
+
+// Set internal canvas resolution to match device pixels
+canvas.width = 768 * dpr;
+canvas.height = 432 * dpr;
+
+// Scale the drawing context to compensate
+ctx.scale(dpr, dpr);
 
 // Establish the root scene
 const mainScene = new Main({
