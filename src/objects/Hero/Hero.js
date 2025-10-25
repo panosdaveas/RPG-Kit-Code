@@ -267,7 +267,7 @@ export class Hero extends GameObject {
       y: this.position.y,
       animation: this.currentAnimation,
       facingDirection: this.facingDirection,
-      attributes: this.attributes.getAll(),
+      // attributes: this.attributes.getAll(),
       levelId: this.currentLevelId
     });
   }
