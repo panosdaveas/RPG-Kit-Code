@@ -8,6 +8,7 @@ import {Hero} from "../objects/Hero/Hero.js";
 import {Rod} from "../objects/Rod/Rod.js";
 import {events} from "../Events.js";
 import {CaveLevel1} from "./CaveLevel1.js";
+import { MainMapLevel } from "./MainMapLevel.js";
 
 const DEFAULT_HERO_POSITION = new Vector2(gridCells(6),gridCells(5))
 
@@ -53,8 +54,8 @@ export class OutdoorLevel1 extends Level {
 
   ready() {
     events.on("HERO_EXITS", this, () => {
-      events.emit("CHANGE_LEVEL", new CaveLevel1({
-        heroPosition: new Vector2(gridCells(3), gridCells(6))
+      events.emit("CHANGE_LEVEL", new MainMapLevel({
+        heroPosition: new Vector2(gridCells(41), gridCells(25))
       }))
     })
   }
