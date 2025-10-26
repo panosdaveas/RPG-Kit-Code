@@ -22,7 +22,7 @@ export class Camera extends GameObject {
 
   clampToMapBounds() {
     const canvasWidth = 768;
-    const canvasHeight = 432;
+    const canvasHeight = 432-16;
     const mapWidth = 1120;  // Your map width in pixels
     const mapHeight = 640; // Your map height in pixels
 
@@ -41,8 +41,8 @@ export class Camera extends GameObject {
   }
 
   updateCameraWithDeadZone(heroPosition) {
-    const canvasWidth = 320;
-    const canvasHeight = 180;
+    const canvasWidth = 768;
+    const canvasHeight = 432;
     const personHalf = 8;
 
     // Calculate where hero appears on screen with current camera position
@@ -77,8 +77,8 @@ export class Camera extends GameObject {
   centerPositionOnTarget(pos) {
     // Create a new position based on the incoming position
     const personHalf = 8;
-    const canvasWidth = 320;
-    const canvasHeight = 180;
+    const canvasWidth = 768;
+    const canvasHeight = 432;
     const halfWidth = -personHalf + canvasWidth / 2;
     const halfHeight = -personHalf + canvasHeight / 2;
     this.position = new Vector2(

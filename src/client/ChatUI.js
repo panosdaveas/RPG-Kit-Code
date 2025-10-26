@@ -35,13 +35,14 @@ export class ChatUI {
         this.container.style.position = 'fixed';
         this.container.style.top = canvasRect.top + 'px';
         this.container.style.left = 0 + 'px';
-        this.container.style.width = '160px';
+        this.container.style.width = '140px';
         this.container.style.height = canvasHeight + 'px';
         this.container.style.zIndex = '1000';
         this.container.style.display = 'flex';
         this.container.style.flexDirection = 'column';
         this.container.style.margin = '0';
         this.container.style.padding = '0';
+        this.container.style.paddingBottom = '16px';
         this.container.style.boxSizing = 'border-box';
 
         // Append to body
@@ -76,7 +77,6 @@ export class ChatUI {
             flex: 1;
             overflow-y: auto;
             padding: 5px;
-
             color: #fff;
             font-family: monospace;
             font-size: 10px;
@@ -131,13 +131,14 @@ export class ChatUI {
             border: 1px solid rgba(100, 100, 100, 0.5);
             font-family: monospace;
             font-size: 10px;
+            max-width: 100%;
         `;
 
         inputContainer.appendChild(this.targetPlayerDropdown);
         inputContainer.appendChild(this.inputField);
 
         // Add to container - set up flexbox layout
-        this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
         // this.container.style.borderColor = 'rgba(100, 100, 100, 0.5)';
         // this.container.style.borderStyle = 'solid';
         // this.container.style.borderWidth = '1px';
@@ -291,7 +292,7 @@ export class ChatUI {
         colonSpan.textContent = ': ';
 
         const textSpan = document.createElement('span');
-        textSpan.style.color = '#ccc';
+        textSpan.style.color = '#fff';
         textSpan.textContent = text;
 
             messageEl.appendChild(nameSpan);
