@@ -47,6 +47,9 @@ export class Main extends GameObject {
     // Change Level handler
     events.on("CHANGE_LEVEL", this, newLevelInstance => {
       this.setLevel(newLevelInstance);
+      // Notify chat system of level change
+      const levelId = newLevelInstance.levelId;
+      this.multiplayerManager.onLevelChanged(levelId);
     });
 
     // Launch Text Box handler
@@ -181,8 +184,6 @@ export class Main extends GameObject {
     if (hero) {
       hero.currentLevelId = this.level.levelId;
       hero.broadcastState();
-      // Notify chat system of level change
-      // this.multiplayerManager.onLevelChanged(this.level.levelId);
     }
 
     // Update visibility for all remote players
