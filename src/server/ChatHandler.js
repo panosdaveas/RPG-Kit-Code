@@ -13,11 +13,14 @@ export class ChatHandler {
             socketId: socket.id
         });
 
+        console.log(`[Chat] Player connected: socketId=${socket.id}, playerId=${playerId}, name=${playerName}`);
+
         // Player joins global chat automatically
         socket.join('global-chat');
 
         // Setup listeners
         socket.on('chat-join-room', (data) => {
+            console.log(`[Chat] Socket ${socket.id} joining room: ${data.room}`);
             socket.join(data.room);
         });
 
@@ -42,6 +45,29 @@ export class ChatHandler {
         if (message.room) {
             // Private message - normalize the room name so both players are in the same room
             const normalizedRoom = this.normalizePrivateRoom(message.room);
+
+            // Extract the socket IDs from the room name
+            // Format: private:socketId1:socketId2
+            const [id1, id2] = this.extractPlayerIdsFromRoom(normalizedRoom);
+
+            // Figure out which ID is the recipient (the one that's NOT the sender)
+            const recipientSocketId = (id1 === socketId) ? id2 : id1;
+
+            // Find the recipient's socket and make sure they join the room
+            if (recipientSocketId) {
+                // Use the namespace to get all sockets and find the recipient
+                const sockets = this.io.sockets.sockets;
+                if (sockets.has(recipientSocketId)) {
+                    const recipientSocket = sockets.get(recipientSocketId);
+                    recipientSocket.join(normalizedRoom);
+                    console.log(`[Chat] Added recipient ${recipientSocketId} to private room ${normalizedRoom}`);
+                } else {
+                    console.warn(`[Chat] Recipient socket ${recipientSocketId} not found in sockets. Available sockets:`, Array.from(sockets.keys()));
+                }
+            } else {
+                console.warn(`[Chat] Could not determine recipient socket ID. id1=${id1}, id2=${id2}, sender=${socketId}`);
+            }
+
             const enrichedMessage = {
                 ...message,
                 playerName: player.name,
@@ -66,8 +92,8 @@ export class ChatHandler {
     }
 
     normalizePrivateRoom(roomName) {
-        // Extract the two player IDs from the room name
-        // Format: private:playerId1:playerId2
+        // Extract the two socket IDs from the room name and normalize the format
+        // Format: private:socketId1:socketId2
         const parts = roomName.split(':');
         if (parts.length !== 3 || parts[0] !== 'private') {
             return roomName;
@@ -79,6 +105,16 @@ export class ChatHandler {
         // Sort the IDs so the room name is always the same regardless of who initiated
         const [smaller, larger] = [id1, id2].sort();
         return `private:${smaller}:${larger}`;
+    }
+
+    extractPlayerIdsFromRoom(roomName) {
+        // Extract the two socket IDs from a normalized private room name
+        // Format: private:socketId1:socketId2
+        const parts = roomName.split(':');
+        if (parts.length !== 3 || parts[0] !== 'private') {
+            return [null, null];
+        }
+        return [parts[1], parts[2]];
     }
 
     // Called when player switches level

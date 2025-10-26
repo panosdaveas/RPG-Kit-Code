@@ -48,6 +48,8 @@ export class ChatManager {
             const normalizedRoom = this.normalizePrivateRoom(this.currentPlayerId, targetPlayerId);
             message.room = normalizedRoom;
 
+            console.log(`Sending private message to ${targetPlayerId}, room: ${normalizedRoom}, currentPlayerId: ${this.currentPlayerId}`);
+
             // Join the private room if we haven't already
             if (!this.joinedRooms.has(normalizedRoom)) {
                 this.socket.emit('chat-join-room', { room: normalizedRoom });
@@ -70,6 +72,8 @@ export class ChatManager {
     // Join a private chat room with a specific player
     joinPrivateChat(targetPlayerId) {
         const normalizedRoom = this.normalizePrivateRoom(this.currentPlayerId, targetPlayerId);
+
+        console.log(`Joining private chat room: ${normalizedRoom}, with player: ${targetPlayerId}, currentPlayerId: ${this.currentPlayerId}`);
 
         // Join the private room if we haven't already
         if (!this.joinedRooms.has(normalizedRoom)) {

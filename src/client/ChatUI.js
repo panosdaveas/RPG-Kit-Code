@@ -11,6 +11,7 @@ export class ChatUI {
         this.multiplayerManager = multiplayerManager;
         this.remotePlayers = remotePlayers || new Map(); // Map of playerId -> player data
         this.selectedTargetPlayerId = null; // null = global/level chat, otherwise private chat with this player
+        this.currentPlayerId = null; // Store our own player ID for proper room filtering
     }
 
     initialize() {
@@ -313,9 +314,24 @@ export class ChatUI {
             if (!message.room || !message.room.startsWith('private:')) {
                 return false;
             }
-            // Check if this private room involves the selected player
-            return message.room.includes(this.selectedTargetPlayerId);
+
+            // Parse the private room to extract both player IDs
+            // Format: private:playerId1:playerId2
+            const [id1, id2] = this.extractPlayerIdsFromRoom(message.room);
+
+            // Check if the selected player is one of the two in this room
+            return id1 === this.selectedTargetPlayerId || id2 === this.selectedTargetPlayerId;
         }
+    }
+
+    extractPlayerIdsFromRoom(roomName) {
+        // Extract the two player IDs from a private room name
+        // Format: private:playerId1:playerId2
+        const parts = roomName.split(':');
+        if (parts.length !== 3 || parts[0] !== 'private') {
+            return [null, null];
+        }
+        return [parts[1], parts[2]];
     }
 
     rerenderMessages() {

@@ -39,6 +39,11 @@ export class Main extends GameObject {
     chatUI.initialize();
     this.chatUI = chatUI;
 
+    // Set the current player ID once the multiplayer connection is established
+    events.on('MULTIPLAYER_CONNECTED', this, (playerId) => {
+      this.chatUI.currentPlayerId = playerId;
+    });
+
     // Change Level handler
     events.on("CHANGE_LEVEL", this, newLevelInstance => {
       this.setLevel(newLevelInstance);

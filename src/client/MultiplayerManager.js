@@ -84,6 +84,11 @@ export class MultiplayerManager {
         this.chatManager.sendMessage(text, targetPlayerId);
     }
 
+    // Join a private chat room with a specific player
+    joinPrivateChat(targetPlayerId) {
+        this.chatManager.joinPrivateChat(targetPlayerId);
+    }
+
     // Call this when level changes (hook into existing level change event)
     onLevelChanged(newLevelId) {
         this.chatManager.onLevelChanged(newLevelId);
