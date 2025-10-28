@@ -12,6 +12,8 @@ export class ChatUI {
         this.remotePlayers = remotePlayers || new Map(); // Map of playerId -> player data
         this.selectedTargetPlayerId = null; // null = global/level chat, otherwise private chat with this player
         this.currentPlayerId = null; // Store our own player ID for proper room filtering
+        this.isOpen = false; // Track drawer state
+        this.toggleButton = null;
     }
 
     initialize() {
@@ -31,11 +33,11 @@ export class ChatUI {
         const canvasWidth = canvasRect.width;
         const canvasHeight = canvasRect.height;
 
-        // Create and style the overlay container with fixed positioning (relative to window)
+        // Create and style the drawer container with fixed positioning
         this.container = document.createElement('div');
         this.container.style.position = 'fixed';
         this.container.style.top = canvasRect.top + 'px';
-        this.container.style.left = 0 + 'px';
+        this.container.style.left = '-140px'; // Hidden off-screen initially
         this.container.style.width = '140px';
         this.container.style.height = canvasHeight + 'px';
         this.container.style.zIndex = '1000';
@@ -45,9 +47,34 @@ export class ChatUI {
         this.container.style.padding = '0';
         this.container.style.paddingBottom = '16px';
         this.container.style.boxSizing = 'border-box';
+        this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        this.container.style.transition = 'left 0.3s ease-out'; // Smooth slide animation
+
+        // Create toggle button
+        this.toggleButton = document.createElement('button');
+        this.toggleButton.style.position = 'fixed';
+        this.toggleButton.style.top = canvasRect.top + 'px';
+        this.toggleButton.style.left = '0';
+        this.toggleButton.style.width = '30px';
+        this.toggleButton.style.height = '30px';
+        this.toggleButton.style.zIndex = '1001';
+        this.toggleButton.style.backgroundColor = 'rgba(26, 26, 26, 0.8)';
+        this.toggleButton.style.color = '#fff';
+        this.toggleButton.style.border = '1px solid rgba(100, 100, 100, 0.5)';
+        this.toggleButton.style.borderRadius = '0px';
+        this.toggleButton.style.cursor = 'pointer';
+        this.toggleButton.style.fontSize = '14px';
+        this.toggleButton.style.padding = '0';
+        this.toggleButton.style.display = 'flex';
+        this.toggleButton.style.alignItems = 'center';
+        this.toggleButton.style.justifyContent = 'center';
+        // this.toggleButton.textContent = '☰'; // Hamburger menu icon
+        this.toggleButton.textContent = '✎'; // Hamburger menu icon
+        this.toggleButton.addEventListener('click', () => this.toggleDrawer());
 
         // Append to body
         document.body.appendChild(this.container);
+        document.body.appendChild(this.toggleButton);
 
         this.setupUI();
         this.setupEventListeners();
@@ -62,9 +89,23 @@ export class ChatUI {
             const canvasRect = this.canvas.getBoundingClientRect();
             this.container.style.top = canvasRect.top + 'px';
             this.container.style.height = canvasRect.height + 'px';
+
+            // Update toggle button position too
+            if (this.toggleButton) {
+                this.toggleButton.style.top = (canvasRect.top + 10) + 'px';
+            }
         };
 
         window.addEventListener('resize', handleResize);
+    }
+
+    toggleDrawer() {
+        this.isOpen = !this.isOpen;
+        if (this.isOpen) {
+            this.container.style.left = '0px'; // Slide in
+        } else {
+            this.container.style.left = '-140px'; // Slide out
+        }
     }
 
     setupUI() {
@@ -78,6 +119,7 @@ export class ChatUI {
             flex: 1;
             overflow-y: auto;
             padding: 5px;
+            padding-top: 35px;
             color: #fff;
             font-family: monospace;
             font-size: 10px;
@@ -138,12 +180,7 @@ export class ChatUI {
         inputContainer.appendChild(this.targetPlayerDropdown);
         inputContainer.appendChild(this.inputField);
 
-        // Add to container - set up flexbox layout
-        this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
-        // this.container.style.borderColor = 'rgba(100, 100, 100, 0.5)';
-        // this.container.style.borderStyle = 'solid';
-        // this.container.style.borderWidth = '1px';
-
+        // Add to container
         this.container.appendChild(this.messageList);
         this.container.appendChild(inputContainer);
     }
@@ -196,6 +233,10 @@ export class ChatUI {
 
             if (targetPlayerId) {
                 this.multiplayerManager.sendChatMessage(message, targetPlayerId);
+                // Close drawer after sending message
+                // if (this.isOpen) {
+                //     this.toggleDrawer();
+                // }
             } else {
                 // Show error message
                 this.addSystemMessage(`Player "${playerName}" not found in this level`);
@@ -203,6 +244,10 @@ export class ChatUI {
         } else {
             // Normal message or to selected player
             this.multiplayerManager.sendChatMessage(text, this.selectedTargetPlayerId);
+            // Close drawer after sending message
+            // if (this.isOpen) {
+            //     this.toggleDrawer();
+            // }
         }
     }
 
