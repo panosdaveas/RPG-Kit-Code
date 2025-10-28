@@ -102,8 +102,10 @@ export class ChatUI {
     toggleDrawer() {
         this.isOpen = !this.isOpen;
         if (this.isOpen) {
+            // events.emit("UI_OPEN");
             this.container.style.left = '0px'; // Slide in
         } else {
+            // events.emit("UI_CLOSED");
             this.container.style.left = '-140px'; // Slide out
         }
     }
@@ -211,6 +213,15 @@ export class ChatUI {
                         this.inputField.value = '';
                     }
                 }
+            });
+
+            // Lock player movement when typing
+            this.inputField.addEventListener('focus', () => {
+                events.emit('UI_OPEN');
+            });
+
+            this.inputField.addEventListener('blur', () => {
+                events.emit('UI_CLOSED');
             });
         }
     }

@@ -84,6 +84,12 @@ export class Hero extends GameObject {
     events.on("END_TEXT_BOX", this, () => {
       this.isLocked = false;
     })
+    events.on("UI_OPEN", this, () => {
+      this.isLocked = true;
+    })
+    events.on("UI_CLOSED", this, () => {
+      this.isLocked = false;
+    })
   }
 
   step(delta, root) {
