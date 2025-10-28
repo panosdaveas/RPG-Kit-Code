@@ -53,6 +53,19 @@ export class Sprite extends GameObject {
       return;
     }
 
+    // Off-screen culling: skip rendering if sprite is outside viewport
+    const spriteWidth = this.frameSize.x * this.scale;
+    const spriteHeight = this.frameSize.y * this.scale;
+    const padding = 32; // Buffer to account for sprites partially visible
+
+    // Check if sprite is completely off-screen
+    if (x + spriteWidth < -padding ||
+        x > ctx.canvas.width + padding ||
+        y + spriteHeight < -padding ||
+        y > ctx.canvas.height + padding) {
+      return; // Skip rendering
+    }
+
     // Find the correct sprite sheet frame to use
     let frameCoordX = 0;
     let frameCoordY = 0;

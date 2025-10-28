@@ -47,22 +47,35 @@ export class TileLayerRenderer extends GameObject {
 
     drawTile(ctx, tile, offsetX, offsetY) {
         const { tileId, x, y } = tile;
+        const tileDrawX = x + offsetX;
+        const tileDrawY = y + offsetY;
+        const tileWidth = this.tiledMap.tileWidth;
+        const tileHeight = this.tiledMap.tileHeight;
+        const padding = 16; // Buffer for tile edges
+
+        // Off-screen culling: skip tiles outside viewport
+        if (tileDrawX + tileWidth < -padding ||
+            tileDrawX > ctx.canvas.width + padding ||
+            tileDrawY + tileHeight < -padding ||
+            tileDrawY > ctx.canvas.height + padding) {
+            return; // Skip rendering
+        }
 
         // Calculate source position in tileset
-        const srcX = (tileId % this.tilesPerRow) * this.tiledMap.tileWidth;
-        const srcY = Math.floor(tileId / this.tilesPerRow) * this.tiledMap.tileHeight;
+        const srcX = (tileId % this.tilesPerRow) * tileWidth;
+        const srcY = Math.floor(tileId / this.tilesPerRow) * tileHeight;
 
         // Draw the tile
         ctx.drawImage(
             this.tilesetImage,
             srcX,
             srcY,
-            this.tiledMap.tileWidth,
-            this.tiledMap.tileHeight,
-            x + offsetX,
-            y + offsetY,
-            this.tiledMap.tileWidth,
-            this.tiledMap.tileHeight
+            tileWidth,
+            tileHeight,
+            tileDrawX,
+            tileDrawY,
+            tileWidth,
+            tileHeight
         );
     }
 }
