@@ -45,7 +45,7 @@ export class ChatUI {
         this.container.style.flexDirection = 'column';
         this.container.style.margin = '0';
         this.container.style.padding = '0';
-        this.container.style.paddingBottom = '16px';
+        this.container.style.paddingBottom = '5vh';
         this.container.style.boxSizing = 'border-box';
         this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
         this.container.style.transition = 'left 0.3s ease-out'; // Smooth slide animation
@@ -92,7 +92,7 @@ export class ChatUI {
 
             // Update toggle button position too
             if (this.toggleButton) {
-                this.toggleButton.style.top = (canvasRect.top + 10) + 'px';
+                this.toggleButton.style.top = (canvasRect.top) + 'px';
             }
         };
 
