@@ -24,7 +24,7 @@ export class MainMapLevel extends Level {
             resources.images.mainMapTileset
         );
 
-        this.tiledMap.parse();
+        // this.tiledMap.parse();
         this.setupLevel(params);
 
         const npc1 = new Npc(gridCells(38), gridCells(30), {
