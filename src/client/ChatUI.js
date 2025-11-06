@@ -123,7 +123,7 @@ export class ChatUI {
             padding: 5px;
             padding-top: 35px;
             color: #fff;
-            font-family: monospace;
+            font-family: fontRetroGaming;
             font-size: 10px;
             border: none;
             word-wrap: break-word;
@@ -139,7 +139,7 @@ export class ChatUI {
             background-color: rgba(26, 26, 26, 0.8);
             color: #fff;
             border: 1px solid rgba(100, 100, 100, 0.5);
-            font-family: monospace;
+            font-family: fontRetroGaming;
             font-size: 9px;
         `;
         this.updatePlayerDropdown();
@@ -174,7 +174,7 @@ export class ChatUI {
             background-color: rgba(26, 26, 26, 0.8);
             color: #fff;
             border: 1px solid rgba(100, 100, 100, 0.5);
-            font-family: monospace;
+            font-family: fontRetroGaming;
             font-size: 10px;
             max-width: 100%;
         `;
@@ -470,8 +470,8 @@ export class ChatUI {
         `;
         notificationEl.textContent = `--- Switched to level: ${data.levelId} ---`;
 
-        this.messageList.appendChild(notificationEl);
-        this.scrollToBottom();
+        // this.messageList.appendChild(notificationEl);
+        // this.scrollToBottom();
     }
 
     getColorForPlayer(playerId) {
