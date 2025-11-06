@@ -36,19 +36,8 @@ const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.imageSmoothingEnabled = false;
 
-  // Save the current state (for camera offset)
-  ctx.save();
-
-  //Offset by camera position
-  if (mainScene.camera) {
-    ctx.translate(mainScene.camera.position.x, mainScene.camera.position.y);
-  }
-
-  // Draw objects in the mounted scene
+  // Draw objects in the mounted scene (camera offset is handled in drawObjects)
   mainScene.drawObjects(ctx);
-
-  // Restore to original state
-  ctx.restore();
 
   // Draw anything above the game world
   mainScene.drawForeground(ctx);

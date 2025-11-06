@@ -14,9 +14,16 @@ export class ChatUI {
         this.currentPlayerId = null; // Store our own player ID for proper room filtering
         this.isOpen = false; // Track drawer state
         this.toggleButton = null;
+        this.isInitialized = false; // Prevent duplicate initialization
     }
 
     initialize() {
+        // Prevent duplicate initialization
+        if (this.isInitialized) {
+            console.warn('ChatUI already initialized. Skipping duplicate initialization.');
+            return;
+        }
+
         // Get the canvas to position relative to it
         const canvas = document.getElementById('game-canvas');
         if (!canvas) {
@@ -27,6 +34,7 @@ export class ChatUI {
         }
 
         this.canvas = canvas;
+        this.isInitialized = true;
 
         // Get the actual rendered dimensions of the canvas
         const canvasRect = canvas.getBoundingClientRect();
@@ -123,7 +131,7 @@ export class ChatUI {
             padding: 5px;
             padding-top: 35px;
             color: #fff;
-            font-family: monospace;
+            font-family: fontRetroGaming;
             font-size: 10px;
             border: none;
             word-wrap: break-word;
@@ -139,7 +147,7 @@ export class ChatUI {
             background-color: rgba(26, 26, 26, 0.8);
             color: #fff;
             border: 1px solid rgba(100, 100, 100, 0.5);
-            font-family: monospace;
+            font-family: fontRetroGaming;
             font-size: 9px;
         `;
         this.updatePlayerDropdown();
@@ -174,7 +182,7 @@ export class ChatUI {
             background-color: rgba(26, 26, 26, 0.8);
             color: #fff;
             border: 1px solid rgba(100, 100, 100, 0.5);
-            font-family: monospace;
+            font-family: fontRetroGaming;
             font-size: 10px;
             max-width: 100%;
         `;
@@ -203,8 +211,9 @@ export class ChatUI {
 
         // Input submission
         if (this.inputField) {
-            this.inputField.addEventListener('keypress', (e) => {
+            this.inputField.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent duplicate events
                     const text = this.inputField.value.trim();
                     if (text) {
                         if (this.multiplayerManager && this.multiplayerManager.isConnected) {
@@ -470,8 +479,8 @@ export class ChatUI {
         `;
         notificationEl.textContent = `--- Switched to level: ${data.levelId} ---`;
 
-        this.messageList.appendChild(notificationEl);
-        this.scrollToBottom();
+        // this.messageList.appendChild(notificationEl);
+        // this.scrollToBottom();
     }
 
     getColorForPlayer(playerId) {
