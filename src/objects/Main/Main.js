@@ -179,6 +179,11 @@ export class Main extends GameObject {
     this.level = newLevelInstance;
     this.addChild(this.level);
 
+    // Center camera on hero's starting position
+    if (newLevelInstance.heroStartPosition) {
+      this.camera.centerPositionOnTarget(newLevelInstance.heroStartPosition);
+    }
+
     // Update local hero's current level and broadcast it
     const hero = this.level.children.find(c => c.constructor.name === 'Hero');
     if (hero) {
@@ -210,9 +215,10 @@ export class Main extends GameObject {
   }
 
   drawObjects(ctx) {
+    // const hero = this.level.children.find(c => c.constructor.name === 'Hero');
     this.children.forEach(child => {
       if (child.drawLayer !== "HUD") {
-        child.draw(ctx, 0, 0);
+        child.draw(ctx, this.camera.position.x, this.camera.position.y);
       }
     });
   }
