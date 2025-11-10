@@ -101,10 +101,18 @@ export class TiledMap {
                 y
             });
 
-            // Check if this tile is solid (for collision)
+            // Check collision properties - upper layer tiles always override lower layers
             const props = this.tileProperties.get(tileId);
+            const posKey = `${x},${y}`;
+
+            // If tile has collide=true, add to walls
+            // Otherwise (no collide property or collide=false), remove from walls
+            // This way upper layer tiles override lower layer collision
             if (props && props.collide) {
-                this.walls.add(`${x},${y}`);
+                this.walls.add(posKey);
+            } else {
+                // No collide property = treat as collide:false, override lower layers
+                this.walls.delete(posKey);
             }
         }
 
