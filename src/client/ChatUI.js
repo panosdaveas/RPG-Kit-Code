@@ -100,7 +100,7 @@ export class ChatUI {
 
             // Update toggle button position too
             if (this.toggleButton) {
-                this.toggleButton.style.top = (canvasRect.top + 10) + 'px';
+                this.toggleButton.style.top = (canvasRect.top) + 'px';
             }
         };
 
