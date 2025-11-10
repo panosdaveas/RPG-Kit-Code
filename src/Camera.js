@@ -22,7 +22,7 @@ export class Camera extends GameObject {
 
   clampToMapBounds() {
     const canvasWidth = 768;
-    const canvasHeight = 432-16;
+    const canvasHeight = 432;
     const mapWidth = 1120;  // Your map width in pixels
     const mapHeight = 640; // Your map height in pixels
 
