@@ -48,13 +48,13 @@ export class WalletUI {
     this.walletButton.id = 'wallet-button';
     this.walletButton.style.position = 'fixed';
     this.walletButton.style.top = canvasRect.top + 'px';
-    this.walletButton.style.left = '30px';
+    this.walletButton.style.left = '60px';
     // this.walletButton.style.padding = '8px 16px';
     this.walletButton.style.backgroundColor = 'rgba(26, 26, 26, 0.8)';
     this.walletButton.style.color = '#fff';
     this.walletButton.style.height = '30px';
-    // this.walletButton.style.border = '1px solid rgba(100, 100, 100, 0.5)';
-    // this.walletButton.style.borderRadius = '4px';
+    this.walletButton.style.border = '1px solid rgba(100, 100, 100, 0.5)';
+    this.walletButton.style.borderRadius = '0px';
     this.walletButton.style.cursor = 'pointer';
     this.walletButton.style.fontSize = '12px';
     this.walletButton.style.fontFamily = 'Arial, sans-serif';
@@ -89,7 +89,7 @@ export class WalletUI {
       this.walletButton.textContent = `Disconnect (${addressShort})`;
       // this.walletButton.style.borderColor = 'rgba(100, 200, 100, 0.7)';
     } else {
-      this.walletButton.textContent = 'Connect Wallet';
+      this.walletButton.textContent = '𝄃𝄃𝄂𝄂𝄀𝄁𝄃𝄂𝄂𝄃';
       // this.walletButton.style.borderColor = 'rgba(100, 100, 100, 0.5)';
     }
   }

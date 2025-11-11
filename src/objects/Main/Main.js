@@ -10,6 +10,7 @@ import { RemoteHero } from "../Hero/RemoteHero.js";
 import { DebugHud } from "../DebugHud/DebugHud.js";
 import { ChatUI } from "../../client/ChatUI.js";
 import { WalletUI } from "../../client/WalletUI.js";
+import { AgentUI } from "../../client/AgentUI.js";
 
 
 export class Main extends GameObject {
@@ -25,6 +26,9 @@ export class Main extends GameObject {
 
     // Wallet
     this.walletUI = null;
+
+    // Agent
+    this.agentUI = null;
   }
 
   ready() {
@@ -198,6 +202,12 @@ export class Main extends GameObject {
       if (!this.walletUI) {
         this.walletUI = new WalletUI(hero);
         this.walletUI.initialize();
+      }
+
+      // Initialize agent UI on first level load
+      if (!this.agentUI) {
+        this.agentUI = new AgentUI(hero, this.walletUI.walletManager, this.multiplayerManager, this.remotePlayers);
+        this.agentUI.initialize();
       }
     }
 

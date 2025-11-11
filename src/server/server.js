@@ -1,7 +1,10 @@
+import 'dotenv/config.js';
 import express from 'express';
+import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { ChatHandler } from './ChatHandler.js';
+import { OnChainAgent } from './OnChainAgent.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -12,10 +15,43 @@ const io = new Server(httpServer, {
     }
 });
 
+// Middleware
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json());
+
 // Track all connected players
 const players = new Map();
 
 const chatHandler = new ChatHandler(io);
+
+// Initialize OnChainAgent
+let agent = null;
+async function initializeAgent() {
+    agent = new OnChainAgent();
+    await agent.initialize();
+}
+initializeAgent().catch(err => console.error('Failed to initialize agent:', err));
+
+// API endpoint for agent commands
+app.post('/api/agent', async (req, res) => {
+    const { command, userAddress, chainId, remotePlayers, playerId } = req.body;
+
+    if (!command || !userAddress) {
+        return res.status(400).json({ error: 'Command and userAddress are required' });
+    }
+
+    if (!agent) {
+        return res.status(500).json({ error: 'Agent not initialized' });
+    }
+
+    try {
+        const result = await agent.executeCommand(command, userAddress, chainId || 'unknown', remotePlayers || [], playerId);
+        res.json(result);
+    } catch (error) {
+        console.error('Agent error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 io.on('connection', (socket) => {
     console.log('Player connected:', socket.id);
