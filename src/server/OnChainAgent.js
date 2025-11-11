@@ -1,5 +1,5 @@
 import { ChatGroq } from '@langchain/groq';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages';
 import { ethers } from 'ethers';
 
 // Check if Groq API key is configured
@@ -22,7 +22,7 @@ export class OnChainAgent {
         groqApiKey: process.env.GROQ_API_KEY,
       });
 
-      // Initialize blockchain tools (using ethers.js directly, GOAT-like interface)
+      // Initialize blockchain tools (GOAT-like interface)
       this.tools = {
         'send_tokens': this.createSendTokensTool(),
         'check_balance': this.createCheckBalanceTool(),
@@ -39,25 +39,26 @@ export class OnChainAgent {
   createSendTokensTool() {
     return {
       name: 'send_tokens',
-      description: 'Send tokens (native or ERC-20) to another wallet address',
+      description: 'Send tokens (native or ERC-20) to another wallet address. Use this when user wants to send tokens.',
       parameters: {
         type: 'object',
         properties: {
-          to: { type: 'string', description: 'Recipient wallet address' },
-          amount: { type: 'string', description: 'Amount to send' },
-          rpc_url: { type: 'string', description: 'RPC URL for the blockchain' },
+          to: { type: 'string', description: 'Recipient wallet address (0x...)' },
+          amount: { type: 'string', description: 'Amount to send (as string number)' },
         },
-        required: ['to', 'amount', 'rpc_url'],
+        required: ['to', 'amount'],
       },
-      execute: async ({ to, amount, rpc_url }) => {
-        // This will be called when LLM decides to use this tool
-        // The actual execution happens on client-side in AgentUI
+      execute: async ({ to, amount }, context) => {
         return {
-          type: 'pending_transaction',
-          to,
-          amount,
-          rpc_url,
-          message: `Ready to send ${amount} tokens to ${to}. Awaiting wallet confirmation.`,
+          status: 'pending_confirmation',
+          from: context.userAddress,
+          to: to,
+          amount: amount,
+          tokenAddress: null, // null for native token, would be token address for ERC-20
+          tokenSymbol: context.nativeToken,
+          chainId: context.chainId,
+          rpcUrl: context.rpcUrl,
+          message: `Ready to send ${amount} ${context.nativeToken} to ${to}. This requires wallet confirmation.`,
         };
       },
     };
@@ -66,22 +67,27 @@ export class OnChainAgent {
   createCheckBalanceTool() {
     return {
       name: 'check_balance',
-      description: 'Check the balance of a wallet address',
+      description: 'Check the balance of a wallet address on the current chain. Use this when user asks about balance.',
       parameters: {
         type: 'object',
         properties: {
-          address: { type: 'string', description: 'Wallet address to check' },
-          rpc_url: { type: 'string', description: 'RPC URL for the blockchain' },
+          address: { type: 'string', description: 'Wallet address to check (0x...)' },
         },
-        required: ['address', 'rpc_url'],
+        required: ['address'],
       },
-      execute: async ({ address, rpc_url }) => {
+      execute: async ({ address }, context) => {
         try {
-          const provider = new ethers.JsonRpcProvider(rpc_url);
+          const provider = new ethers.JsonRpcProvider(context.rpcUrl);
           const balance = await provider.getBalance(address);
-          return `Balance: ${ethers.formatEther(balance)} native tokens`;
+          return {
+            success: true,
+            message: `Balance: ${ethers.formatEther(balance)} ${context.nativeToken}`,
+          };
         } catch (error) {
-          return `Error checking balance: ${error.message}`;
+          return {
+            success: false,
+            message: `Error checking balance: ${error.message}`,
+          };
         }
       },
     };
@@ -90,11 +96,11 @@ export class OnChainAgent {
   createGetPriceTool() {
     return {
       name: 'get_token_price',
-      description: 'Get the current price of a cryptocurrency token',
+      description: 'Get the current market price of a cryptocurrency token in USD.',
       parameters: {
         type: 'object',
         properties: {
-          token_symbol: { type: 'string', description: 'Token symbol (e.g., bitcoin, ethereum, avax)' },
+          token_symbol: { type: 'string', description: 'Token symbol (e.g., bitcoin, ethereum, avalanche-2)' },
         },
         required: ['token_symbol'],
       },
@@ -107,12 +113,21 @@ export class OnChainAgent {
 
           if (data[token_symbol.toLowerCase()]) {
             const price = data[token_symbol.toLowerCase()].usd;
-            return `${token_symbol} price: $${price}`;
+            return {
+              success: true,
+              message: `${token_symbol} price: $${price}`,
+            };
           }
 
-          return `Could not find price for ${token_symbol}`;
+          return {
+            success: false,
+            message: `Could not find price for ${token_symbol}`,
+          };
         } catch (error) {
-          return `Error fetching price: ${error.message}`;
+          return {
+            success: false,
+            message: `Error fetching price: ${error.message}`,
+          };
         }
       },
     };
@@ -137,12 +152,16 @@ export class OnChainAgent {
         });
       }
 
-      // Get RPC URL for current chain
+      // Get RPC URL and native token for current chain
       const rpcUrl = this.getRpcUrl(chainId);
+      const nativeToken = await this.getChainNativeToken(chainId);
+
+      // Context for tools
+      const toolContext = { rpcUrl, nativeToken, userAddress, chainId };
 
       // Create system prompt with tool descriptions
       const toolDescriptions = Object.values(this.tools)
-        .map(tool => `- ${tool.name}: ${tool.description}`)
+        .map(tool => `- **${tool.name}**: ${tool.description}`)
         .join('\n');
 
       const systemPrompt = new SystemMessage(
@@ -151,7 +170,7 @@ export class OnChainAgent {
 YOUR INFORMATION:
 - Wallet address: ${userAddress}
 - Your blockchain: ${chainId}
-- RPC URL: ${rpcUrl}
+- Native token: ${nativeToken}
 - Your player ID: ${playerId}
 
 ${playersContext}
@@ -159,35 +178,104 @@ ${playersContext}
 AVAILABLE TOOLS:
 ${toolDescriptions}
 
-When the user asks to:
-- Send tokens: Use send_tokens tool with recipient address and amount
-- Check balance: Use check_balance tool
-- Get prices: Use get_token_price tool
+INSTRUCTIONS:
+- When the user wants to send tokens, respond with: I'll send [amount] to [address]. Then use send_tokens tool.
+- When the user asks about balance, use check_balance tool.
+- When the user asks about prices, use get_token_price tool.
+- Always provide clear explanations.
+- For transactions, explain what will happen.
+- Use tool format: [TOOL_NAME: param1=value1, param2=value2]
 
-Always provide helpful explanations along with tool usage.
-For transactions, include all details clearly.`
+Example tool usage:
+[send_tokens: to=0x..., amount=0.5]
+[check_balance: address=0x...]
+[get_token_price: token_symbol=avalanche-2]`
       );
 
-      // Create user message
+      // Initialize conversation messages
+      const messages = [systemPrompt];
+
+      // Add user message
       const userMessage = new HumanMessage(userInput);
+      messages.push(userMessage);
 
-      // Get response from LLM
-      const response = await this.llm.invoke([systemPrompt, userMessage]);
+      // Agent loop - keep going until no more tools to execute
+      let finalResponse = '';
+      let iterations = 0;
+      const maxIterations = 5;
+      let pendingTransaction = null;
 
-      const message = response.content;
-      console.log(`✅ Agent response: ${message}\n`);
+      while (iterations < maxIterations) {
+        iterations++;
+        console.log(`\n📍 Agent loop iteration ${iterations}`);
 
-      // Parse tool usage from response (simple pattern matching)
-      const toolResult = await this.parseAndExecuteTools(message, userAddress, chainId, remotePlayers);
+        // Get LLM response
+        const response = await this.llm.invoke(messages);
+        const responseText = response.content;
+        console.log(`LLM Response: ${responseText}`);
+
+        finalResponse = responseText;
+
+        // Try to extract and execute tools from response
+        const toolExecutions = await this.parseAndExecuteTools(
+          responseText,
+          userAddress,
+          chainId,
+          remotePlayers,
+          toolContext
+        );
+
+        if (toolExecutions.length === 0) {
+          // No tools to execute, agent is done
+          console.log('No tools to execute, ending conversation');
+          break;
+        }
+
+        // Add assistant message
+        messages.push(new AIMessage(responseText));
+
+        // Execute tools and collect results
+        let hasTransaction = false;
+        let toolResults = '';
+
+        for (const toolExecution of toolExecutions) {
+          console.log(`Executing tool: ${toolExecution.name}`);
+
+          if (toolExecution.name === 'send_tokens') {
+            // Transaction detected
+            pendingTransaction = toolExecution.result;
+            hasTransaction = true;
+            toolResults += `Tool: send_tokens\nResult: ${toolExecution.result.message}\n`;
+          } else {
+            // Other tools execute immediately
+            const toolResult = toolExecution.result;
+            toolResults += `Tool: ${toolExecution.name}\nResult: ${toolResult.message}\n`;
+          }
+        }
+
+        // If there's a transaction, stop here and let client handle it
+        if (hasTransaction) {
+          console.log('Transaction pending, stopping agent loop');
+          break;
+        }
+
+        // Add tool results back to conversation
+        const toolMessage = new HumanMessage(
+          `Tool execution results:\n${toolResults}`
+        );
+        messages.push(toolMessage);
+      }
+
+      console.log(`✅ Agent finished after ${iterations} iterations\n`);
 
       return {
         success: true,
-        message: message,
+        message: finalResponse,
         data: {
           address: userAddress,
           chainId: chainId,
         },
-        transaction: toolResult, // null if no transaction, or transaction object
+        transaction: pendingTransaction, // null if no transaction
       };
     } catch (error) {
       console.error('❌ Agent error:', error.message);
@@ -195,69 +283,64 @@ For transactions, include all details clearly.`
     }
   }
 
-  async parseAndExecuteTools(message, userAddress, chainId, remotePlayers) {
-    // Check if message contains transaction intent
-    const sendPatterns = [/send|transfer|pay/i, /proceed with the transaction/i];
-    const isSendIntent = sendPatterns.some(pattern => pattern.test(message));
+  async parseAndExecuteTools(message, userAddress, chainId, remotePlayers, toolContext) {
+    const executions = [];
 
-    if (!isSendIntent) {
-      return null;
-    }
+    // Parse tool calls in format [TOOL_NAME: param1=value1, param2=value2]
+    const toolPattern = /\[(\w+):\s*([^\]]+)\]/g;
+    let match;
 
-    // Extract ALL addresses from message
-    const addressPattern = /0x[a-fA-F0-9]{40}/g;
-    const allAddresses = message.match(addressPattern) || [];
+    while ((match = toolPattern.exec(message)) !== null) {
+      const toolName = match[1];
+      const paramsString = match[2];
 
-    if (allAddresses.length === 0) {
-      return null;
-    }
-
-    // Find the recipient address - it should be the one that's NOT the sender
-    let recipientAddress = null;
-    for (const address of allAddresses) {
-      if (address.toLowerCase() !== userAddress.toLowerCase()) {
-        recipientAddress = address;
-        break;
+      if (!this.tools[toolName]) {
+        console.warn(`Unknown tool: ${toolName}`);
+        continue;
       }
+
+      // Parse parameters
+      const params = {};
+      const paramPattern = /(\w+)=([^,\]]+)/g;
+      let paramMatch;
+
+      while ((paramMatch = paramPattern.exec(paramsString)) !== null) {
+        const key = paramMatch[1].trim();
+        const value = paramMatch[2].trim();
+        params[key] = value;
+      }
+
+      console.log(`Parsed tool ${toolName} with params:`, params);
+
+      // Special handling for send_tokens to extract recipient correctly
+      if (toolName === 'send_tokens') {
+        // Try to find correct recipient address (not sender)
+        const addressPattern = /0x[a-fA-F0-9]{40}/g;
+        const allAddresses = message.match(addressPattern) || [];
+
+        let recipientAddress = params.to;
+        for (const addr of allAddresses) {
+          if (addr.toLowerCase() !== userAddress.toLowerCase()) {
+            recipientAddress = addr;
+            break;
+          }
+        }
+
+        params.to = recipientAddress;
+      }
+
+      // Execute tool
+      const tool = this.tools[toolName];
+      const result = await tool.execute(params, toolContext);
+
+      executions.push({
+        name: toolName,
+        params,
+        result,
+      });
     }
 
-    if (!recipientAddress) {
-      recipientAddress = allAddresses[allAddresses.length - 1];
-    }
-
-    // Extract amount
-    const amountPattern = /(\d+\.?\d*)\s*(AVAX|ETH|TOKEN|wei|gwei|ether)?/i;
-    const amountMatch = message.match(amountPattern);
-    if (!amountMatch) {
-      return null;
-    }
-
-    const amount = amountMatch[1];
-
-    // Get native token symbol
-    let tokenSymbol = 'TOKEN';
-    if (amountMatch[2]) {
-      tokenSymbol = amountMatch[2].toUpperCase();
-    } else {
-      const nativeToken = await this.getChainNativeToken(chainId);
-      tokenSymbol = nativeToken;
-    }
-
-    console.log(`💰 Transaction detected: ${amount} ${tokenSymbol} to ${recipientAddress}`);
-
-    const rpcUrl = this.getRpcUrl(chainId);
-
-    return {
-      type: 'send_tokens',
-      from: userAddress,
-      to: recipientAddress,
-      amount: amount,
-      tokenSymbol: tokenSymbol,
-      tokenAddress: null,
-      chainId: chainId,
-      rpcUrl: rpcUrl,
-      status: 'pending_confirmation',
-    };
+    return executions;
   }
 
   async getChainNativeToken(chainIdHex) {

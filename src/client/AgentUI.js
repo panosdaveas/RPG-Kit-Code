@@ -92,7 +92,7 @@ export class AgentUI {
     this.container.style.display = 'flex';
     this.container.style.flexDirection = 'column';
     this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
-    this.container.style.backdropFilter = 'blur(10px)';
+    this.container.style.backdropFilter = 'blur(2px)';
     this.container.style.borderLeft = '1px solid rgba(100, 100, 100, 0.3)';
     this.container.style.transition = 'right 0.3s ease-out';
     this.container.style.fontFamily = 'Arial, sans-serif';
@@ -136,7 +136,7 @@ export class AgentUI {
     // Input field
     this.inputField = document.createElement('input');
     this.inputField.type = 'text';
-    this.inputField.placeholder = 'Ask anything...';
+    this.inputField.placeholder = '> Ask anything...';
     this.inputField.style.flex = '1';
     this.inputField.style.padding = '6px 8px';
     this.inputField.style.backgroundColor = 'rgba(26, 26, 26, 0.8)';
@@ -351,20 +351,20 @@ Confirm to proceed with wallet signature.
     messageDiv.style.wordWrap = 'break-word';
 
     if (sender === 'user') {
-      messageDiv.style.backgroundColor = 'rgba(50, 100, 200, 0.3)';
-      messageDiv.style.borderLeft = '2px solid rgba(100, 150, 255, 0.6)';
+      messageDiv.style.backgroundColor = 'rgba(100, 100, 100, 0.3)';
+      messageDiv.style.borderLeft = '2px solid rgba(200, 200, 200, 0.6)';
       messageDiv.textContent = `You: ${text}`;
     } else if (sender === 'agent') {
-      messageDiv.style.backgroundColor = 'rgba(100, 200, 100, 0.2)';
-      messageDiv.style.borderLeft = '2px solid rgba(100, 200, 100, 0.6)';
+      messageDiv.style.backgroundColor = 'rgba(80, 80, 80, 0.3)';
+      messageDiv.style.borderLeft = '2px solid rgba(180, 180, 180, 0.6)';
       messageDiv.textContent = `Agent: ${text}`;
     } else if (sender === 'agent-error') {
       messageDiv.style.backgroundColor = 'rgba(200, 100, 100, 0.2)';
       messageDiv.style.borderLeft = '2px solid rgba(200, 100, 100, 0.6)';
       messageDiv.textContent = `Agent: ${text}`;
     } else if (sender === 'agent-loading') {
-      messageDiv.style.backgroundColor = 'rgba(150, 150, 100, 0.2)';
-      messageDiv.style.borderLeft = '2px solid rgba(200, 200, 100, 0.6)';
+      messageDiv.style.backgroundColor = 'rgba(100, 100, 100, 0.2)';
+      messageDiv.style.borderLeft = '2px solid rgba(150, 150, 150, 0.6)';
       messageDiv.textContent = `Agent: ${text}`;
     }
 
