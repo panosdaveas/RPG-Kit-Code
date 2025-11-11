@@ -65,15 +65,6 @@ export class AgentUI {
 
     this.toggleButton.addEventListener('click', () => this.toggleDrawer());
 
-    // Hover effects
-    this.toggleButton.addEventListener('mouseover', () => {
-      this.toggleButton.style.backgroundColor = 'rgba(40, 40, 40, 0.9)';
-    });
-
-    this.toggleButton.addEventListener('mouseout', () => {
-      this.toggleButton.style.backgroundColor = 'rgba(26, 26, 26, 0.8)';
-    });
-
     document.body.appendChild(this.toggleButton);
   }
 
@@ -153,19 +144,11 @@ export class AgentUI {
       }
     });
 
-    this.inputField.addEventListener('focus', () => {
-      this.inputField.style.borderColor = 'rgba(100, 150, 255, 0.5)';
-    });
-
-    this.inputField.addEventListener('blur', () => {
-      this.inputField.style.borderColor = 'rgba(100, 100, 100, 0.3)';
-    });
-
     // Send button
     const sendButton = document.createElement('button');
     sendButton.textContent = '→';
     sendButton.style.padding = '6px 12px';
-    sendButton.style.backgroundColor = 'rgba(100, 150, 255, 0.6)';
+    sendButton.style.backgroundColor = 'rgba(120, 120, 120, 0.7)';
     sendButton.style.color = '#fff';
     sendButton.style.border = 'none';
     sendButton.style.borderRadius = '3px';
@@ -175,12 +158,6 @@ export class AgentUI {
     sendButton.style.transition = 'background-color 0.2s ease';
 
     sendButton.addEventListener('click', () => this.sendMessage());
-    sendButton.addEventListener('mouseover', () => {
-      sendButton.style.backgroundColor = 'rgba(100, 150, 255, 0.8)';
-    });
-    sendButton.addEventListener('mouseout', () => {
-      sendButton.style.backgroundColor = 'rgba(100, 150, 255, 0.6)';
-    });
 
     inputContainer.appendChild(this.inputField);
     inputContainer.appendChild(sendButton);
