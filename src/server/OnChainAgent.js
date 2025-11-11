@@ -148,7 +148,8 @@ export class OnChainAgent {
       if (remotePlayers.length > 0) {
         playersContext = 'Connected players:\n';
         remotePlayers.forEach((player, index) => {
-          playersContext += `  ${index + 1}. ${player.name} (${player.address.substring(0, 6)}...) on chain ${player.chainId}, in level ${player.currentLevel}\n`;
+          // playersContext += `  ${index + 1}. ${player.name} (${player.address.substring(0, 6)}...) on chain ${player.chainId}, in level ${player.currentLevel}\n`;
+          playersContext += `  ${index + 1}. ${player.name} [${player.address}] on chain ${player.chainId}\n`;
         });
       }
 
