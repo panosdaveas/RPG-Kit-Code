@@ -9,6 +9,7 @@ import { MultiplayerManager } from "../../client/MultiplayerManager.js";
 import { RemoteHero } from "../Hero/RemoteHero.js";
 import { DebugHud } from "../DebugHud/DebugHud.js";
 import { ChatUI } from "../../client/ChatUI.js";
+import { WalletUI } from "../../client/WalletUI.js";
 
 
 export class Main extends GameObject {
@@ -21,6 +22,9 @@ export class Main extends GameObject {
     // Multiplayer
     this.multiplayerManager = new MultiplayerManager();
     this.remotePlayers = new Map(); // playerId -> RemoteHero instance
+
+    // Wallet
+    this.walletUI = null;
   }
 
   ready() {
@@ -84,7 +88,7 @@ export class Main extends GameObject {
       }
 
       if (withObject instanceof RemoteHero) {
-        console.log("Interacting with remote player:", withObject.playerId);
+        console.log("Interacting with remote player:", withObject);
         // Handle remote player interaction here
         // For example, show their name, stats, trade menu, etc.
         return;
@@ -189,6 +193,12 @@ export class Main extends GameObject {
     if (hero) {
       hero.currentLevelId = this.level.levelId;
       hero.broadcastState();
+
+      // Initialize wallet UI on first level load
+      if (!this.walletUI) {
+        this.walletUI = new WalletUI(hero);
+        this.walletUI.initialize();
+      }
     }
 
     // Update visibility for all remote players
