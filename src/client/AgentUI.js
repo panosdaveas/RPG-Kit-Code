@@ -391,7 +391,7 @@ Confirm to proceed with wallet signature.
       const canvasRect = this.canvas.getBoundingClientRect();
       this.container.style.top = canvasRect.top + 'px';
       this.container.style.height = canvasRect.height + 'px';
-      this.toggleButton.style.top = canvasRect.top + 10 + 'px';
+      this.toggleButton.style.top = canvasRect.top + 'px';
     };
 
     window.addEventListener('resize', handleResize);

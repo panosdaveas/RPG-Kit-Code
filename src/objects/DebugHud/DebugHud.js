@@ -20,6 +20,7 @@ export class DebugHud extends GameObject {
         this.playerId = "Connecting...";
         this.connectedPlayers = 0;
         this.multiplayerEnabled = false;
+        this.heroPosition = { x: 0, y: 0 };
     }
 
     step(delta, root) {
@@ -43,6 +44,17 @@ export class DebugHud extends GameObject {
         if (root.level) {
             this.multiplayerEnabled = root.level.multiplayerEnabled !== false;
         }
+
+        // Cache hero position
+        if (root.level && root.level.children) {
+            const hero = root.level.children.find(child => child.constructor.name === "Hero");
+            if (hero) {
+                this.heroPosition = {
+                    x: Math.round(hero.position.x/16),
+                    y: Math.round(hero.position.y/16)
+                };
+            }
+        }
     }
 
     drawImage(ctx, drawPosX, drawPosY) {
@@ -55,7 +67,7 @@ export class DebugHud extends GameObject {
 
         // Draw semi-transparent background
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(x - padding, y - padding, boxWidth + padding * 2, (lineHeight * 4) + padding * 2);
+        ctx.fillRect(x - padding, y - padding, boxWidth + padding * 2, (lineHeight * 5) + padding * 2);
 
         // Set text style
         ctx.textRendering = "geometricPrecision";
@@ -74,6 +86,10 @@ export class DebugHud extends GameObject {
         currentY += lineHeight;
 
         ctx.fillText(`Multiplayer: ${this.multiplayerEnabled ? "ON" : "OFF"}`, Math.floor(x), Math.floor(currentY));
+        currentY += lineHeight;
+
+        ctx.fillStyle = "#fff";
+        ctx.fillText(`Pos: (${this.heroPosition.x}, ${this.heroPosition.y})`, Math.floor(x), Math.floor(currentY));
         currentY += lineHeight;
 
         // Color-coded FPS

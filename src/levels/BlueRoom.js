@@ -9,62 +9,32 @@ import { Npc } from "../objects/Npc/Npc.js";
 import { Vector2 } from "../Vector2.js";
 import { events } from "../Events.js";
 import { gridCells } from "../helpers/grid.js";
-import { BlueRoom } from "./BlueRoom.js";
-import {TALKED_TO_A, TALKED_TO_B} from "../StoryFlags.js";
+import { MainMapLevel } from "./MainMapLevel.js";
+import { UP } from "../Input.js";
 
-export class MainMapLevel extends Level {
+export class BlueRoom extends Level {
     constructor(params = {}) {
         super({});
-        this.levelId = "cave";
-        this.multiplayerEnabled = true; // render remote players here
+        this.levelId = "blue-room";
+        this.multiplayerEnabled = false; // render remote players here
+        this.cameraEnabled = false; // Disable camera for small rooms
 
         // Create TiledMap parser
         this.tiledMap = new TiledMap(
-            resources.json.mainMap,
-            resources.images.mainMapTileset
+            resources.json.blueRoom,
+            resources.images.blueRoomTileset
         );
 
         // this.tiledMap.parse();
         this.setupLevel(params);
 
-        const npc1 = new Npc(gridCells(38), gridCells(30), {
-            //content: "I am the first NPC!",
-            content: [
-                {
-                    string: "I just can't stand that guy.",
-                    requires: [TALKED_TO_B],
-                    bypass: [TALKED_TO_A],
-                    addsFlag: TALKED_TO_A,
-                },
-                {
-                    string: "He is just the worst!",
-                    requires: [TALKED_TO_A],
-                },
-                {
-                    string: "Grumble grumble. Another day at work.",
-                    requires: [],
-                }
-            ],
+        const npc1 = new Npc(gridCells(38), gridCells(20), {
+            content: "I am the first NPC!",
             portraitFrame: 1
         })
         this.addChild(npc1);
 
-        const npc2 = new Npc(gridCells(38), gridCells(28), {
-            content: [
-                {
-                    string: "What a wonderful day at work in the cave!",
-                    requires: [],
-                    addsFlag: TALKED_TO_B
-                }
-            ],
-            portraitFrame: 0
-        })
-        this.addChild(npc2);
-
-        const rod = new Rod(gridCells(37), gridCells(25))
-        this.addChild(rod);
-
-        const exit = new Exit(gridCells(11), gridCells(27))
+        const exit = new Exit(gridCells(37), gridCells(25))
         this.addChild(exit);
     }
 
@@ -83,6 +53,9 @@ export class MainMapLevel extends Level {
         this.heroStartPosition = params.heroPosition || new Vector2(heroSpawn.x, heroSpawn.y);
         const hero = new Hero(this.heroStartPosition.x, this.heroStartPosition.y);
         this.addChild(hero);
+        hero.facingDirection = UP;
+        hero.body.animations.play("standUp");
+        hero.currentAnimation = 'standUp';
 
         // Spawn items from object layer
         const items = this.tiledMap.getObjectsByType("item");
@@ -92,7 +65,7 @@ export class MainMapLevel extends Level {
                 this.addChild(rod);
             }
         });
-        
+
 
         // Spawn exits
         const exits = this.tiledMap.getObjectsByType("exit");
@@ -116,8 +89,8 @@ export class MainMapLevel extends Level {
     ready() {
         events.on("HERO_EXITS", this, () => {
             // Handle level transitions
-            events.emit("CHANGE_LEVEL", new BlueRoom({
-                heroPosition: new Vector2(gridCells(37), gridCells(24))
+            events.emit("CHANGE_LEVEL", new MainMapLevel({
+                heroPosition: new Vector2(gridCells(11), gridCells(28))
             }))
         });
     }

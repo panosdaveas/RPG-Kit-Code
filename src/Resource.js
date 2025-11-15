@@ -18,12 +18,14 @@ class Resources {
       textBox: "/sprites/text-box.png",
       fontWhite: "/sprites/sprite-font-white.png",
       portraits: "/sprites/portraits-sheet.png",
-      mainMapTileset: "/tilesets/outdoor_tileset_16_x_16.png"
+      mainMapTileset: "/tilesets/outdoor_tileset_16_x_16.png",
+      blueRoomTileset: "/tilesets/public_indoor_tileset.png"
     };
 
     // JSON maps to download
     this.toLoadJson = {
       mainMap: "/maps/main_map_16x16.json",
+      blueRoom: "/maps/room_blue.json",
     };
 
     // A bucket to keep all of our images
