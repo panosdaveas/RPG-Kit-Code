@@ -5,6 +5,10 @@ html, body {
   background: black;
 }
 
+* {
+  cursor: url('/sprites/pointer.png'), auto;
+}
+
 canvas {
   width: 100%;
   background: black;

@@ -56,12 +56,12 @@ export class AgentUI {
     this.toggleButton.style.borderRadius = '0';
     this.toggleButton.style.width = '30px';
     this.toggleButton.style.height = '30px';
-    this.toggleButton.style.cursor = 'pointer';
-    this.toggleButton.style.fontSize = '12px';
-    this.toggleButton.style.fontFamily = 'Arial, sans-serif';
+    // this.toggleButton.style.cursor = 'pointer';
+    this.toggleButton.style.fontSize = '14px';
+    this.toggleButton.style.fontFamily = 'fontRetroGaming';
     this.toggleButton.style.zIndex = '1001';
     this.toggleButton.style.transition = 'background-color 0.2s ease';
-    this.toggleButton.textContent = '🤖';
+    this.toggleButton.textContent = '֎';
 
     this.toggleButton.addEventListener('click', () => this.toggleDrawer());
 
@@ -86,7 +86,8 @@ export class AgentUI {
     this.container.style.backdropFilter = 'blur(2px)';
     this.container.style.borderLeft = '1px solid rgba(100, 100, 100, 0.3)';
     this.container.style.transition = 'right 0.3s ease-out';
-    this.container.style.fontFamily = 'Arial, sans-serif';
+    this.container.style.fontFamily = 'fontRetroGaming';
+    // this.container.style.fontFamily = 'Arial, sans-serif';
     this.container.style.color = '#fff';
     this.container.style.boxSizing = 'border-box';
     this.container.style.padding = '10px';
@@ -98,7 +99,7 @@ export class AgentUI {
     header.style.marginBottom = '10px';
     header.style.paddingBottom = '10px';
     header.style.borderBottom = '1px solid rgba(100, 100, 100, 0.3)';
-    header.textContent = '🤖 On-Chain Agent';
+    header.textContent = '֎ On-Chain Agent';
     this.container.appendChild(header);
 
     // Message list
@@ -135,13 +136,22 @@ export class AgentUI {
     this.inputField.style.border = '1px solid rgba(100, 100, 100, 0.3)';
     this.inputField.style.borderRadius = '3px';
     this.inputField.style.fontSize = '11px';
-    this.inputField.style.fontFamily = 'Arial, sans-serif';
+    this.inputField.style.fontFamily = 'fontRetroGaming';
     this.inputField.style.outline = 'none';
 
     this.inputField.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         this.sendMessage();
       }
+    });
+
+    // Lock player movement when input is focused
+    this.inputField.addEventListener('focus', () => {
+      events.emit('UI_OPEN');
+    });
+
+    this.inputField.addEventListener('blur', () => {
+      events.emit('UI_CLOSED');
     });
 
     // Send button
@@ -152,9 +162,9 @@ export class AgentUI {
     sendButton.style.color = '#fff';
     sendButton.style.border = 'none';
     sendButton.style.borderRadius = '3px';
-    sendButton.style.cursor = 'pointer';
+    // sendButton.style.cursor = 'pointer';
     sendButton.style.fontSize = '12px';
-    sendButton.style.fontFamily = 'Arial, sans-serif';
+    sendButton.style.fontFamily = 'fontRetroGaming';
     sendButton.style.transition = 'background-color 0.2s ease';
 
     sendButton.addEventListener('click', () => this.sendMessage());
@@ -268,7 +278,15 @@ Confirm to proceed with wallet signature.
       this.addMessageToUI('Executing transaction...', 'agent-loading');
       const txHash = await this.executeTransaction(transaction);
       this.removeLastMessage();
-      this.addMessageToUI(`✅ Transaction sent! Hash: ${txHash}`, 'agent');
+
+      // Build success message with block explorer link
+      let successMessage = `✅ Transaction sent! Hash: ${txHash}`;
+      if (transaction.blockExplorerUrl) {
+        const blockExplorerLink = `${transaction.blockExplorerUrl}/tx/${txHash}`;
+        successMessage += `\nBlock Explorer: ${blockExplorerLink}`;
+      }
+
+      this.addMessageToUI(successMessage, 'agent');
     } catch (error) {
       this.removeLastMessage();
       this.addMessageToUI(`❌ Transaction failed: ${error.message}`, 'agent-error');
@@ -362,7 +380,6 @@ Confirm to proceed with wallet signature.
     if (this.isOpen) {
       this.container.style.right = '0';
       this.inputField.focus();
-      events.emit('UI_OPEN');
     } else {
       this.container.style.right = '-350px';
       events.emit('UI_CLOSED');

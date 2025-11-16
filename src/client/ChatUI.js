@@ -56,6 +56,7 @@ export class ChatUI {
         this.container.style.paddingBottom = '5vh';
         this.container.style.boxSizing = 'border-box';
         this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        this.container.style.backdropFilter = 'blur(2px)';
         this.container.style.transition = 'left 0.3s ease-out'; // Smooth slide animation
 
         // Create toggle button
@@ -70,7 +71,7 @@ export class ChatUI {
         this.toggleButton.style.color = '#fff';
         this.toggleButton.style.border = '1px solid rgba(100, 100, 100, 0.5)';
         this.toggleButton.style.borderRadius = '0px';
-        this.toggleButton.style.cursor = 'pointer';
+        // this.toggleButton.style.cursor = 'pointer';
         this.toggleButton.style.fontSize = '14px';
         this.toggleButton.style.padding = '0';
         this.toggleButton.style.display = 'flex';

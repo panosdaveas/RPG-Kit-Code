@@ -55,9 +55,9 @@ export class WalletUI {
     this.walletButton.style.height = '30px';
     this.walletButton.style.border = '1px solid rgba(100, 100, 100, 0.5)';
     this.walletButton.style.borderRadius = '0px';
-    this.walletButton.style.cursor = 'pointer';
-    this.walletButton.style.fontSize = '12px';
-    this.walletButton.style.fontFamily = 'Arial, sans-serif';
+    // this.walletButton.style.cursor = 'pointer';
+    this.walletButton.style.fontSize = '14px';
+    this.walletButton.style.fontFamily = 'fontRetroGaming';
     this.walletButton.style.zIndex = '1001';
     this.walletButton.style.transition = 'background-color 0.2s ease';
     this.walletButton.style.whiteSpace = 'nowrap';
@@ -67,6 +67,14 @@ export class WalletUI {
 
     // Add click handler
     this.walletButton.addEventListener('click', () => this.handleButtonClick());
+
+    // Add right-click handler to copy address
+    this.walletButton.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (this.walletManager.isConnected && this.walletManager.address) {
+        this.copyAddressToClipboard();
+      }
+    });
 
     // Add hover effects
     this.walletButton.addEventListener('mouseover', () => {
@@ -86,7 +94,7 @@ export class WalletUI {
     if (this.walletManager.isConnected && this.walletManager.address) {
       const addressShort = this.walletManager.address.substring(0, 6) + '...' +
                            this.walletManager.address.substring(38);
-      this.walletButton.textContent = `Disconnect (${addressShort})`;
+      this.walletButton.textContent = `(${addressShort})`;
       // this.walletButton.style.borderColor = 'rgba(100, 200, 100, 0.7)';
     } else {
       this.walletButton.textContent = '𝄃𝄃𝄂𝄂𝄀𝄁𝄃𝄂𝄂𝄃';
@@ -137,5 +145,24 @@ export class WalletUI {
     };
 
     window.addEventListener('resize', handleResize);
+  }
+
+  async copyAddressToClipboard() {
+    try {
+      await navigator.clipboard.writeText(this.walletManager.address);
+
+      // Show visual feedback
+      const originalText = this.walletButton.textContent;
+      this.walletButton.textContent = 'Copied!';
+      // this.walletButton.style.backgroundColor = 'rgba(100, 200, 100, 0.8)';
+
+      // Revert after 1.5 seconds
+      setTimeout(() => {
+        this.walletButton.textContent = originalText;
+        this.walletButton.style.backgroundColor = 'rgba(26, 26, 26, 0.8)';
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to copy address:', error);
+    }
   }
 }

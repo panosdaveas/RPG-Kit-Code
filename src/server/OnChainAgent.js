@@ -13,6 +13,15 @@ export class OnChainAgent {
     this.tools = {};
   }
 
+  isConnectedPlayer(address, connectedPlayers) {
+    if (!address || !connectedPlayers || connectedPlayers.length === 0) {
+      return false;
+    }
+    return connectedPlayers.some(player =>
+      player.address.toLowerCase() === address.toLowerCase()
+    );
+  }
+
   async initialize() {
     try {
       // Initialize Groq LLM
@@ -39,16 +48,26 @@ export class OnChainAgent {
   createSendTokensTool() {
     return {
       name: 'send_tokens',
-      description: 'Send tokens (native or ERC-20) to another wallet address. Use this when user wants to send tokens.',
+      description: 'Send tokens (native or ERC-20) to another connected player. Use this when user wants to send tokens.',
       parameters: {
         type: 'object',
         properties: {
-          to: { type: 'string', description: 'Recipient wallet address (0x...)' },
+          to: { type: 'string', description: 'Recipient wallet address (0x...) - must be a connected player' },
           amount: { type: 'string', description: 'Amount to send (as string number)' },
         },
         required: ['to', 'amount'],
       },
       execute: async ({ to, amount }, context) => {
+        // Validate that recipient is a connected player
+        const isValidRecipient = this.isConnectedPlayer(to, context.connectedPlayers);
+
+        if (!isValidRecipient) {
+          return {
+            success: false,
+            message: `Error: Can only send tokens to connected players. ${to} is not a connected player.`,
+          };
+        }
+
         return {
           status: 'pending_confirmation',
           from: context.userAddress,
@@ -58,6 +77,7 @@ export class OnChainAgent {
           tokenSymbol: context.nativeToken,
           chainId: context.chainId,
           rpcUrl: context.rpcUrl,
+          blockExplorerUrl: context.blockExplorerUrl,
           message: `Ready to send ${amount} ${context.nativeToken} to ${to}. This requires wallet confirmation.`,
         };
       },
@@ -67,21 +87,19 @@ export class OnChainAgent {
   createCheckBalanceTool() {
     return {
       name: 'check_balance',
-      description: 'Check the balance of a wallet address on the current chain. Use this when user asks about balance.',
+      description: 'Check your own wallet balance on the current chain. Use this when user asks about their balance.',
       parameters: {
         type: 'object',
-        properties: {
-          address: { type: 'string', description: 'Wallet address to check (0x...)' },
-        },
-        required: ['address'],
+        properties: {},
+        required: [],
       },
-      execute: async ({ address }, context) => {
+      execute: async (params, context) => {
         try {
           const provider = new ethers.JsonRpcProvider(context.rpcUrl);
-          const balance = await provider.getBalance(address);
+          const balance = await provider.getBalance(context.userAddress);
           return {
             success: true,
-            message: `Balance: ${ethers.formatEther(balance)} ${context.nativeToken}`,
+            message: `Your balance: ${ethers.formatEther(balance)} ${context.nativeToken}`,
           };
         } catch (error) {
           return {
@@ -153,12 +171,13 @@ export class OnChainAgent {
         });
       }
 
-      // Get RPC URL and native token for current chain
-      const rpcUrl = this.getRpcUrl(chainId);
+      // Get RPC URL, native token, and block explorer URL for current chain
+      const rpcUrl = await this.getRpcUrl(chainId);
       const nativeToken = await this.getChainNativeToken(chainId);
+      const blockExplorerUrl = await this.getBlockExplorerUrl(chainId);
 
       // Context for tools
-      const toolContext = { rpcUrl, nativeToken, userAddress, chainId };
+      const toolContext = { rpcUrl, nativeToken, userAddress, chainId, connectedPlayers, blockExplorerUrl };
 
       // Create system prompt with tool descriptions
       const toolDescriptions = Object.values(this.tools)
@@ -180,16 +199,17 @@ AVAILABLE TOOLS:
 ${toolDescriptions}
 
 INSTRUCTIONS:
-- When the user wants to send tokens, respond with: I'll send [amount] to [address]. Then use send_tokens tool.
-- When the user asks about balance, use check_balance tool.
+- IMPORTANT: You can ONLY send tokens to connected players listed above. Reject any requests to send to addresses not in the connected players list.
+- When the user wants to send tokens to a connected player, respond with: I'll send [amount] to [player name]. Then use send_tokens tool.
+- When the user asks about balance, only check YOUR OWN balance using check_balance tool. Do NOT check other players' balances.
 - When the user asks about prices, use get_token_price tool.
 - Always provide clear explanations.
 - For transactions, explain what will happen.
 - Use tool format: [TOOL_NAME: param1=value1, param2=value2]
 
 Example tool usage:
-[send_tokens: to=0x..., amount=0.5]
-[check_balance: address=0x...]
+[send_tokens: to=0x123..., amount=0.5]
+[check_balance]
 [get_token_price: token_symbol=avalanche-2]`
       );
 
@@ -358,11 +378,14 @@ Example tool usage:
       }
 
       const data = await response.json();
+      console.log(`Chain ${chainIdDecimal} data:`, data);
 
       if (data.nativeCurrency && data.nativeCurrency.symbol) {
+        console.log(`Found native token: ${data.nativeCurrency.symbol}`);
         return data.nativeCurrency.symbol;
       }
 
+      console.warn(`No native currency found for chain ${chainIdDecimal}`);
       return 'TOKEN';
     } catch (error) {
       console.warn(`Error querying chain data: ${error.message}, using default`);
@@ -370,16 +393,60 @@ Example tool usage:
     }
   }
 
-  getRpcUrl(chainId) {
-    const rpcMap = {
-      '0x1': 'https://eth.rpc.blxrbdn.com',
-      '0xa': 'https://mainnet.optimism.io',
-      '0x89': 'https://polygon-rpc.com',
-      '0xa86a': 'https://api.avax.network/ext/bc/C/rpc',
-      '0x43114': 'https://api.avax.network/ext/bc/C/rpc',
-      '0x38': 'https://bsc-dataseed1.binance.org',
-      '0xa869': 'https://api.avax-test.network/ext/bc/C/rpc', // Avalanche Fuji testnet
-    };
-    return rpcMap[chainId] || 'https://api.avax.network/ext/bc/C/rpc';
+  async getRpcUrl(chainId) {
+    try {
+      const chainIdDecimal = typeof chainId === 'string' && chainId.startsWith('0x')
+        ? parseInt(chainId, 16)
+        : chainId;
+
+      const response = await fetch(`https://chainlist.org/chain/${chainIdDecimal}`);
+
+      if (!response.ok) {
+        console.warn(`Could not fetch chain info for ${chainIdDecimal}`);
+        return chainId; // Return the chainId hex if request fails
+      }
+
+      const data = await response.json();
+
+      if (data.rpc && data.rpc.length > 0) {
+        // Return the first public RPC URL
+        const publicRpc = data.rpc.find(rpc => !rpc.includes('${') && rpc.startsWith('http'));
+        if (publicRpc) {
+          return publicRpc;
+        }
+      }
+
+      return chainId; // Return the chainId hex if no RPC found
+    } catch (error) {
+      console.warn(`Error fetching RPC URL: ${error.message}`);
+      return chainId; // Return the chainId hex if request fails
+    }
+  }
+
+  async getBlockExplorerUrl(chainId) {
+    try {
+      const chainIdDecimal = typeof chainId === 'string' && chainId.startsWith('0x')
+        ? parseInt(chainId, 16)
+        : chainId;
+
+      const response = await fetch(`https://chainlist.org/chain/${chainIdDecimal}`);
+
+      if (!response.ok) {
+        console.warn(`Could not fetch chain info for block explorer`);
+        return null;
+      }
+
+      const data = await response.json();
+
+      if (data.explorers && data.explorers.length > 0) {
+        // Return the first block explorer URL
+        return data.explorers[0].url;
+      }
+
+      return null;
+    } catch (error) {
+      console.warn(`Error fetching block explorer URL: ${error.message}`);
+      return null;
+    }
   }
 }

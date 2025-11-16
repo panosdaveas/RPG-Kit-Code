@@ -44,8 +44,8 @@ export class WalletManager {
       this.onDisconnect();
     });
 
-    // Check if already connected
-    this.checkConnection();
+    // Start with disconnected state - user must manually connect
+    console.log('Wallet initialized in disconnected state');
   }
 
   async checkConnection() {
