@@ -1,22 +1,28 @@
 export class ChatHandler {
     constructor(io) {
         this.io = io;
-        this.players = new Map(); // playerId -> {name, levelId, socket}
+        this.players = new Map(); // socketId -> {playerId, name, chainId, socketId}
     }
 
-    handleConnection(socket, playerId, playerName) {
+    handleConnection(socket, playerId, playerName, chainId = null) {
         // Store player metadata
         this.players.set(socket.id, {
             playerId,
             name: playerName,
-            levelId: 'main-map', // or whatever default
+            chainId: chainId,
             socketId: socket.id
         });
 
-        console.log(`[Chat] Player connected: socketId=${socket.id}, playerId=${playerId}, name=${playerName}`);
+        console.log(`[Chat] Player connected: socketId=${socket.id}, playerId=${playerId}, name=${playerName}, chainId=${chainId}`);
 
         // Player joins global chat automatically
         socket.join('global-chat');
+
+        // Player joins their chain room if chainId is provided
+        if (chainId) {
+            socket.join(`chain:${chainId}`);
+            console.log(`[Chat] Player ${playerId} joined chain room: chain:${chainId}`);
+        }
 
         // Setup listeners
         socket.on('chat-join-room', (data) => {
@@ -43,41 +49,68 @@ export class ChatHandler {
 
         // Send to appropriate room(s)
         if (message.room) {
-            // Private message - normalize the room name so both players are in the same room
-            const normalizedRoom = this.normalizePrivateRoom(message.room);
+            const room = message.room;
 
-            // Extract the socket IDs from the room name
-            // Format: private:socketId1:socketId2
-            const [id1, id2] = this.extractPlayerIdsFromRoom(normalizedRoom);
+            // Check what type of room this is
+            if (room.startsWith('private:')) {
+                // Private message - normalize the room name so both players are in the same room
+                const normalizedRoom = this.normalizePrivateRoom(room);
 
-            // Figure out which ID is the recipient (the one that's NOT the sender)
-            const recipientSocketId = (id1 === socketId) ? id2 : id1;
+                // Extract the socket IDs from the room name
+                // Format: private:socketId1:socketId2
+                const [id1, id2] = this.extractPlayerIdsFromRoom(normalizedRoom);
 
-            // Find the recipient's socket and make sure they join the room
-            if (recipientSocketId) {
-                // Use the namespace to get all sockets and find the recipient
-                const sockets = this.io.sockets.sockets;
-                if (sockets.has(recipientSocketId)) {
-                    const recipientSocket = sockets.get(recipientSocketId);
-                    recipientSocket.join(normalizedRoom);
-                    console.log(`[Chat] Added recipient ${recipientSocketId} to private room ${normalizedRoom}`);
+                // Figure out which ID is the recipient (the one that's NOT the sender)
+                const recipientSocketId = (id1 === socketId) ? id2 : id1;
+
+                // Find the recipient's socket and make sure they join the room
+                if (recipientSocketId) {
+                    // Use the namespace to get all sockets and find the recipient
+                    const sockets = this.io.sockets.sockets;
+                    if (sockets.has(recipientSocketId)) {
+                        const recipientSocket = sockets.get(recipientSocketId);
+                        recipientSocket.join(normalizedRoom);
+                        console.log(`[Chat] Added recipient ${recipientSocketId} to private room ${normalizedRoom}`);
+                    } else {
+                        console.warn(`[Chat] Recipient socket ${recipientSocketId} not found in sockets. Available sockets:`, Array.from(sockets.keys()));
+                    }
                 } else {
-                    console.warn(`[Chat] Recipient socket ${recipientSocketId} not found in sockets. Available sockets:`, Array.from(sockets.keys()));
+                    console.warn(`[Chat] Could not determine recipient socket ID. id1=${id1}, id2=${id2}, sender=${socketId}`);
                 }
-            } else {
-                console.warn(`[Chat] Could not determine recipient socket ID. id1=${id1}, id2=${id2}, sender=${socketId}`);
-            }
 
-            const enrichedMessage = {
-                ...message,
-                playerName: player.name,
-                playerId: player.playerId,
-                timestamp: Date.now(),
-                room: normalizedRoom // Preserve room info for client-side filtering
-            };
-            this.io.to(normalizedRoom).emit('chat-receive-message', enrichedMessage);
+                const enrichedMessage = {
+                    ...message,
+                    playerName: player.name,
+                    playerId: player.playerId,
+                    timestamp: Date.now(),
+                    room: normalizedRoom // Preserve room info for client-side filtering
+                };
+                this.io.to(normalizedRoom).emit('chat-receive-message', enrichedMessage);
+            } else if (room.startsWith('chain:')) {
+                // Chain message - send to all players in that chain room
+                const enrichedMessage = {
+                    ...message,
+                    playerName: player.name,
+                    playerId: player.playerId,
+                    timestamp: Date.now(),
+                    room: room // Preserve which chain room this is for
+                };
+                console.log(`[Chat] Sending message to chain room: ${room}`);
+                this.io.to(room).emit('chat-receive-message', enrichedMessage);
+            } else if (room === 'global-chat') {
+                // Global message - send to all players
+                const enrichedMessage = {
+                    ...message,
+                    playerName: player.name,
+                    playerId: player.playerId,
+                    timestamp: Date.now(),
+                    room: room
+                };
+                console.log(`[Chat] Sending message to global chat`);
+                this.io.to('global-chat').emit('chat-receive-message', enrichedMessage);
+            }
         } else if (message.rooms) {
-            // Public message to multiple rooms
+            // Legacy: Public message to multiple rooms (kept for backward compatibility)
             message.rooms.forEach(room => {
                 const enrichedMessage = {
                     ...message,
@@ -117,19 +150,21 @@ export class ChatHandler {
         return [parts[1], parts[2]];
     }
 
-    // Called when player switches level
-    updatePlayerLevel(socketId, newLevelId) {
+    // Called when player switches chain
+    updatePlayerChain(socketId, newChainId) {
         const player = this.players.get(socketId);
         if (!player) return;
 
-        const oldLevelId = player.levelId;
-        player.levelId = newLevelId;
+        const oldChainId = player.chainId;
+        player.chainId = newChainId;
 
         // Server-side room management (optional, can be client-driven)
         const socket = this.io.sockets.sockets.get(socketId);
         if (socket) {
-            socket.leave(`level:${oldLevelId}`);
-            socket.join(`level:${newLevelId}`);
+            if (oldChainId) {
+                socket.leave(`chain:${oldChainId}`);
+            }
+            socket.join(`chain:${newChainId}`);
         }
     }
 }

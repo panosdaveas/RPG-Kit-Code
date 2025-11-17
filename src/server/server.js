@@ -121,11 +121,13 @@ io.on('connection', (socket) => {
 
     // Initialize chat handler for this socket
     const playerName = `Player_${socket.id.substring(0, 6)}`;
-    chatHandler.handleConnection(socket, socket.id, playerName);
+    const playerData = players.get(socket.id);
+    const initialChainId = playerData?.attributes?.chainId || null;
+    chatHandler.handleConnection(socket, socket.id, playerName, initialChainId);
 
-    // When level changes (you likely already emit this)
-    socket.on('level-changed', (data) => {
-        chatHandler.updatePlayerLevel(socket.id, data.levelId);
+    // When player changes chain
+    socket.on('chain-changed', (data) => {
+        chatHandler.updatePlayerChain(socket.id, data.chainId);
     });
 
 });

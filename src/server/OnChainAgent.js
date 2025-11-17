@@ -11,9 +11,34 @@ if (!process.env.GROQ_API_KEY) {
 }
 
 export class OnChainAgent {
+  // Class constants for reusable configurations
+  static WRITE_OPERATIONS = [
+    // Token transfers
+    'send_token', 'transfer', 'transfer_erc20',
+    // Token approvals
+    'approve_token_evm', 'approve_token', 'approve', 'revoke_token_approval_evm', 'revoke_approval',
+    // Swaps and DEX operations
+    'swap', 'swap_tokens', 'swap_exact_tokens_for_tokens',
+    // Generic transaction sending
+    'sendTransaction', 'send_transaction',
+    // Bridge/cross-chain operations
+    'bridge', 'bridge_tokens',
+    // Staking operations
+    'stake', 'unstake', 'claim_rewards',
+    // Contract interactions that might transfer value
+    'execute_contract', 'call_contract',
+    // Signing operations that require wallet access
+    'sign_message', 'signMessage', 'sign_typed_data', 'signTypedData', 'verify_message',
+  ];
+
+  static SIGNING_OPERATIONS = [
+    'sign_typed_data_evm', 'signTypedDataEvm', 'sign_message_evm', 'signMessageEvm'
+  ];
+
   constructor() {
     this.llm = null;
     this.chainMap = this.getChainMap();
+    this.customTools = {}; // For custom in-game tools
   }
 
   // Map chain IDs to viem chain objects
@@ -41,19 +66,40 @@ export class OnChainAgent {
     return chain.rpcUrls?.default?.http?.[0] || 'https://api.avax-test.network/ext/bc/C/rpc';
   }
 
-  // Get native token symbol for chain
+  // Get native token symbol for chain - now using viem chain objects
   getNativeTokenSymbol(chainId) {
-    const chainIdDecimal = typeof chainId === 'string' && chainId.startsWith('0x')
-      ? parseInt(chainId, 16)
-      : chainId;
-    const nativeTokenMap = {
-      43113: 'AVAX',  // Avalanche Fuji
-      43114: 'AVAX',  // Avalanche Mainnet
-      11155111: 'ETH', // Ethereum Sepolia
-      1: 'ETH',        // Ethereum Mainnet
-      80001: 'MATIC',  // Polygon Mumbai
+    const chain = this.getViemChain(chainId);
+    // Viem chains have nativeCurrency property
+    return chain.nativeCurrency?.symbol || 'NATIVE_TOKEN';
+  }
+
+  // Get block explorer URL for chain - using viem data when available
+  getBlockExplorerUrl(chainId) {
+    const chain = this.getViemChain(chainId);
+    return chain.blockExplorers?.default?.url || this.getFallbackBlockExplorer(chainId);
+  }
+
+  // Fallback explorer URLs (in case viem doesn't have them)
+  getFallbackBlockExplorer(chainId) {
+    const chainIdDecimal = this.getChainIdDecimal(chainId);
+    const explorers = {
+      43113: 'https://testnet.snowtrace.io',
+      43114: 'https://snowtrace.io',
+      11155111: 'https://sepolia.etherscan.io',
+      1: 'https://etherscan.io',
+      80001: 'https://mumbai.polygonscan.com',
     };
-    return nativeTokenMap[chainIdDecimal] || 'NATIVE_TOKEN';
+    return explorers[chainIdDecimal] || '';
+  }
+
+  // Register custom in-game tools
+  registerCustomTools(tools) {
+    if (!tools || typeof tools !== 'object') {
+      console.warn('⚠️  Invalid custom tools provided');
+      return;
+    }
+    this.customTools = { ...this.customTools, ...tools };
+    console.log(`✅ Registered ${Object.keys(tools).length} custom tools`);
   }
 
   async initialize() {
@@ -140,9 +186,12 @@ export class OnChainAgent {
         console.warn('⚠️  No GOAT tools loaded, agent may have limited functionality');
       }
 
+      // Merge GOAT tools with custom in-game tools
+      const allTools = { ...goatTools, ...this.customTools };
+
       // Build tool descriptions for LLM - include brief descriptions
-      const toolDescriptions = Object.values(goatTools)
-        .slice(0, 15) // Limit to 15 tools to save tokens
+      // Show all tools now - LLM is smart enough to pick the right ones
+      const toolDescriptions = Object.values(allTools)
         .map(tool => {
           const name = tool.name || 'unknown';
           const desc = tool.description || 'No description';
@@ -151,6 +200,8 @@ export class OnChainAgent {
           return `${name}: ${shortDesc}`;
         })
         .join('\n');
+
+      console.log(`📚 Loaded ${Object.keys(allTools).length} total tools (${Object.keys(goatTools).length} GOAT + ${Object.keys(this.customTools).length} custom)`);
 
       // Build connected players info for the agent
       const playersInfo = remotePlayers.length > 0
@@ -212,6 +263,7 @@ Respond to user requests by calling appropriate tools. For transfers, always val
       let iterations = 0;
       const maxIterations = 5;
       let lastToolExecutions = []; // Track last tool executions for transaction handling
+      let previousToolNames = []; // For infinite loop detection
 
       while (iterations < maxIterations) {
         iterations++;
@@ -227,7 +279,7 @@ Respond to user requests by calling appropriate tools. For transfers, always val
         // Try to extract and execute tools from response
         const toolExecutions = await this.parseAndExecuteTools(
           responseText,
-          goatTools,
+          allTools,
           userAddress,
           chainId,
           remotePlayers
@@ -237,6 +289,16 @@ Respond to user requests by calling appropriate tools. For transfers, always val
           console.log('No tools to execute, ending conversation');
           break;
         }
+
+        // Infinite loop detection: check if same tools are being called repeatedly
+        const currentToolNames = toolExecutions.map(ex => ex.name).join(',');
+        if (previousToolNames === currentToolNames && iterations > 1) {
+          console.warn('⚠️  Potential infinite loop detected: same tools called consecutively');
+          console.warn(`Previous: [${previousToolNames}], Current: [${currentToolNames}]`);
+          finalResponse = 'I seem to be stuck in a loop. Please try a different request or rephrase your question.';
+          break;
+        }
+        previousToolNames = currentToolNames;
 
         // Store for later transaction handling
         lastToolExecutions = toolExecutions;
@@ -252,18 +314,8 @@ Respond to user requests by calling appropriate tools. For transfers, always val
         }
 
         // Check if there are any write operations in the tool executions
-        // Using same comprehensive list as in parseAndExecuteTools()
-        const writeOperations = [
-          'send_token', 'transfer', 'transfer_erc20',
-          'approve_token_evm', 'approve_token', 'approve', 'revoke_token_approval_evm', 'revoke_approval',
-          'swap', 'swap_tokens', 'swap_exact_tokens_for_tokens',
-          'sendTransaction', 'send_transaction',
-          'bridge', 'bridge_tokens',
-          'stake', 'unstake', 'claim_rewards',
-          'execute_contract', 'call_contract',
-        ];
         const hasWriteOperation = toolExecutions.some(ex =>
-          writeOperations.includes(ex.name)
+          OnChainAgent.WRITE_OPERATIONS.includes(ex.name)
         );
 
         // For read-only tools (when no write operations), end conversation after execution
@@ -281,12 +333,8 @@ Respond to user requests by calling appropriate tools. For transfers, always val
 
       // Check if any write operations were executed that need wallet confirmation
       console.log(`[executeCommand] Checking lastToolExecutions (${lastToolExecutions.length} items):`, lastToolExecutions.map(ex => ex.name));
-      const transactionOps = [
-        'send_token', 'approve_token_evm', 'revoke_token_approval_evm',
-        'transfer', 'approve', 'swap', 'sendTransaction', 'bridge', 'stake'
-      ];
       const writeOperations = lastToolExecutions.filter(ex =>
-        transactionOps.includes(ex.name)
+        OnChainAgent.WRITE_OPERATIONS.includes(ex.name)
       );
 
       console.log(`[executeCommand] Found ${writeOperations.length} write operations`);
@@ -345,13 +393,7 @@ Respond to user requests by calling appropriate tools. For transfers, always val
       }
 
       const viemChain = this.getViemChain(chainId);
-      const chainExplorer = {
-        43113: 'https://testnet.snowtrace.io',
-        43114: 'https://snowtrace.io',
-        11155111: 'https://sepolia.etherscan.io',
-        1: 'https://etherscan.io',
-        80001: 'https://mumbai.polygonscan.com',
-      };
+      const explorerUrl = this.getBlockExplorerUrl(chainId);
 
       return {
         status: 'pending_confirmation',
@@ -363,7 +405,7 @@ Respond to user requests by calling appropriate tools. For transfers, always val
         tokenSymbol: tokenSymbol,
         chainId: chainId,
         chainName: viemChain.name,
-        blockExplorerUrl: chainExplorer[this.getChainIdDecimal(chainId)],
+        blockExplorerUrl: explorerUrl,
       };
     } catch (error) {
       console.error('Error building transaction data:', error.message);
@@ -439,50 +481,9 @@ Respond to user requests by calling appropriate tools. For transfers, always val
       }
     }
 
-    // Define write operations that require wallet confirmation
-    // These are tools that can move tokens, approve spending, or execute transactions
-    const writeOperations = [
-      // Token transfers
-      'send_token',
-      'transfer',
-      'transfer_erc20',
-
-      // Token approvals
-      'approve_token_evm',
-      'approve_token',
-      'approve',
-      'revoke_token_approval_evm',
-      'revoke_approval',
-
-      // Swaps and DEX operations
-      'swap',
-      'swap_tokens',
-      'swap_exact_tokens_for_tokens',
-
-      // Generic transaction sending
-      'sendTransaction',
-      'send_transaction',
-
-      // Bridge/cross-chain operations
-      'bridge',
-      'bridge_tokens',
-
-      // Staking operations
-      'stake',
-      'unstake',
-      'claim_rewards',
-
-      // Contract interactions that might transfer value
-      'execute_contract',
-      'call_contract',
-
-      // Signing operations that require wallet access
-      'sign_message',
-      'signMessage',
-      'sign_typed_data',
-      'signTypedData',
-      'verify_message',
-    ];
+    // Use class constants for write and signing operations
+    const writeOperations = OnChainAgent.WRITE_OPERATIONS;
+    const signingOps = OnChainAgent.SIGNING_OPERATIONS;
 
     // Map tools to their address parameter names
     // This ensures we validate the correct parameter for each tool type
@@ -622,10 +623,22 @@ Respond to user requests by calling appropriate tools. For transfers, always val
             const availableAddresses = Array.from(validAddresses).length > 0
               ? Array.from(validAddresses).join(', ')
               : 'None connected';
+            // Structured error response
             executions.push({
               name: toolName,
               params,
-              result: `Error: Invalid recipient address ${recipientParam}. Only connected players are allowed.\n\nAvailable players:\n${availableAddresses}`,
+              result: JSON.stringify({
+                error: 'INVALID_RECIPIENT_ADDRESS',
+                message: `Invalid recipient address: ${recipientParam}`,
+                code: 'INVALID_ADDRESS',
+                details: {
+                  providedAddress: recipientParam,
+                  reason: 'Address not in connected players list'
+                },
+                availableAddresses: Array.from(validAddresses),
+                recoveryHint: 'Use one of the addresses from the connected players list above'
+              }),
+              isError: true
             });
             continue;
           } else {
@@ -635,16 +648,15 @@ Respond to user requests by calling appropriate tools. For transfers, always val
       }
 
       // Check if this is a write operation that requires wallet confirmation
-      // Also include signing operations that shouldn't be executed by the agent
-      const signingOperations = ['sign_typed_data_evm', 'signTypedDataEvm', 'sign_message_evm', 'signMessageEvm'];
-      if (writeOperations.includes(toolName) || signingOperations.includes(toolName)) {
+      if (writeOperations.includes(toolName) || signingOps.includes(toolName)) {
         console.log(`⚠️  Write/Signing operation detected: ${toolName} - returning params for wallet confirmation`);
         executions.push({
           name: toolName,
           params,
           result: JSON.stringify({
             status: 'pending_confirmation',
-            message: `Ready to ${toolName}. Awaiting wallet signature.`
+            message: `Ready to execute ${toolName}. Awaiting wallet signature.`,
+            code: 'AWAITING_WALLET_CONFIRMATION'
           }),
         });
         continue;
@@ -660,7 +672,7 @@ Respond to user requests by calling appropriate tools. For transfers, always val
         } else if (typeof tool.run === 'function') {
           result = await tool.run(params);
         } else {
-          result = 'Tool execution not supported';
+          throw new Error('Tool execution method not supported');
         }
 
         const resultString = typeof result === 'string' ? result : JSON.stringify(result);
@@ -669,13 +681,22 @@ Respond to user requests by calling appropriate tools. For transfers, always val
           name: toolName,
           params,
           result: resultString,
+          isError: false
         });
       } catch (error) {
         console.error(`Error executing tool ${toolName}:`, error.message);
+        // Structured error response
         executions.push({
           name: toolName,
           params,
-          result: `Error: ${error.message}`,
+          result: JSON.stringify({
+            error: 'TOOL_EXECUTION_FAILED',
+            code: 'EXECUTION_ERROR',
+            message: error.message,
+            toolName: toolName,
+            recoveryHint: 'Check the tool parameters and try again'
+          }),
+          isError: true
         });
       }
     }
