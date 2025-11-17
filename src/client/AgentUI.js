@@ -139,9 +139,16 @@ export class AgentUI {
     this.inputField.style.fontFamily = 'fontRetroGaming';
     this.inputField.style.outline = 'none';
 
-    this.inputField.addEventListener('keypress', (e) => {
+    // Debounce flag to prevent duplicate submissions
+    this.isSending = false;
+
+    this.inputField.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        this.sendMessage();
+        e.preventDefault(); // Prevent default Enter behavior
+        const text = this.inputField.value.trim();
+        if (text && !this.isSending) {
+          this.sendMessage();
+        }
       }
     });
 
@@ -167,7 +174,12 @@ export class AgentUI {
     sendButton.style.fontFamily = 'fontRetroGaming';
     sendButton.style.transition = 'background-color 0.2s ease';
 
-    sendButton.addEventListener('click', () => this.sendMessage());
+    sendButton.addEventListener('click', () => {
+      const text = this.inputField.value.trim();
+      if (text && !this.isSending) {
+        this.sendMessage();
+      }
+    });
 
     inputContainer.appendChild(this.inputField);
     inputContainer.appendChild(sendButton);
@@ -179,6 +191,9 @@ export class AgentUI {
   async sendMessage() {
     const userInput = this.inputField.value.trim();
     if (!userInput) return;
+
+    // Set sending flag to prevent duplicate submissions
+    this.isSending = true;
 
     // Clear input
     this.inputField.value = '';
@@ -248,6 +263,9 @@ export class AgentUI {
       console.error('Error processing agent command:', error);
       this.removeLastMessage();
       this.addMessageToUI(`Error: ${error.message}`, 'agent-error');
+    } finally {
+      // Reset sending flag to allow future submissions
+      this.isSending = false;
     }
   }
 
@@ -303,8 +321,8 @@ Confirm to proceed with wallet signature.
     const { ethers } = await import('ethers');
 
     try {
-      // Get signer from wallet
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      // Get signer from wallet - explicitly pass chainId to avoid ENS resolution on unsupported networks
+      const provider = new ethers.BrowserProvider(window.ethereum, parseInt(transaction.chainId));
       const signer = await provider.getSigner();
 
       let txResponse;

@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@goat-sdk/core": "latest",
-    "@goat-sdk/plugin-evm": "latest",
+    "@goat-sdk/wallet-evm": "latest",
+    "@goat-sdk/wallet-viem": "^0.3.0",
     "@langchain/core": "^0.1.0",
     "@langchain/groq": "^0.0.13",
     "concurrently": "^9.2.1",
