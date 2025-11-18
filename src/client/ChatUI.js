@@ -316,7 +316,8 @@ export class ChatUI {
         // Add chain option and store reference
         const chainOption = document.createElement('option');
         chainOption.value = 'chain';
-        chainOption.textContent = 'My Chain';
+        // Display the actual chainId if available, otherwise show placeholder
+        chainOption.textContent = this.currentChainId || 'My Chain';
         // Disable if no chainId available
         chainOption.disabled = !this.currentChainId;
         this.chainOption = chainOption; // Store reference for later enable/disable
@@ -518,6 +519,8 @@ export class ChatUI {
             for (let option of this.targetPlayerDropdown.options) {
                 if (option.value === 'chain') {
                     option.disabled = !isEnabled;
+                    // Update text to show chainId if enabled, otherwise "My Chain"
+                    option.textContent = isEnabled && this.currentChainId ? this.currentChainId : 'My Chain';
                     this.chainOption = option; // Update stored reference
                     return;
                 }
