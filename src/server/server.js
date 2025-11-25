@@ -4,7 +4,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { ChatHandler } from './ChatHandler.js';
-import { OnChainAgent } from './OnChainAgent.js';
+import { ThirdWebAgent } from './ThirdWebAgent.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,10 +24,10 @@ const players = new Map();
 
 const chatHandler = new ChatHandler(io);
 
-// Initialize OnChainAgent
+// Initialize ThirdWebAgent
 let agent = null;
 async function initializeAgent() {
-    agent = new OnChainAgent();
+    agent = new ThirdWebAgent();
     await agent.initialize();
 }
 initializeAgent().catch(err => console.error('Failed to initialize agent:', err));

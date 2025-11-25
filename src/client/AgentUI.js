@@ -249,9 +249,9 @@ export class AgentUI {
       // Add agent response
       this.addMessageToUI(result.message, 'agent');
 
-      // Check if there's a pending transaction
-      if (result.transaction && result.transaction.status === 'pending_confirmation') {
-        await this.handlePendingTransaction(result.transaction);
+      // Handle ThirdWeb actions (transactions are handled by the wallet)
+      if (result.actions && result.actions.length > 0) {
+        this.addMessageToUI('💼 Transaction prepared and sent to your wallet for confirmation...', 'agent');
       }
 
       // Emit event for other systems to listen to agent actions
