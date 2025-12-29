@@ -10,12 +10,18 @@ export class Camera extends GameObject {
     this.deadZoneWidth = 40;  // How far left/right hero can move before camera follows - change to 0 for instant follow
     this.deadZoneHeight = 30; // How far up/down hero can move before camera follows - change to 0 for instant follow
 
+    this.currentLevel = null;
+
     events.on("HERO_POSITION", this, heroPosition => {
-      this.updateCameraWithDeadZone(heroPosition);
+      // Only update camera if it's enabled for the current level
+      if (this.currentLevel?.cameraEnabled !== false) {
+        this.updateCameraWithDeadZone(heroPosition);
+      }
     })
 
     // Camera knows when a new level starts
     events.on("CHANGE_LEVEL", this, (newMap) => {
+      this.currentLevel = newMap;
       this.centerPositionOnTarget(newMap.heroStartPosition);
     })
   }

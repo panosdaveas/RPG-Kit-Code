@@ -1,8 +1,13 @@
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
   overflow: hidden;
   background: black;
+}
+
+* {
+  cursor: url('/sprites/pointer.png'), auto;
 }
 
 canvas {
