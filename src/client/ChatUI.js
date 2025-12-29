@@ -1,4 +1,4 @@
-import { events, CHAT_MESSAGE_RECEIVED, CHAT_ROOM_CHANGED } from "../Events.js";
+import { events, CHAT_MESSAGE_RECEIVED, CHAT_ROOM_CHANGED, HERO_ATTRIBUTES_UPDATE } from "../Events.js";
 
 export class ChatUI {
     constructor(multiplayerManager = null, remotePlayers = null) {
@@ -7,11 +7,13 @@ export class ChatUI {
         this.inputField = null;
         this.messageList = null;
         this.targetPlayerDropdown = null;
+        this.chainOption = null; // Reference to the "My Chain" option
         this.subscriptionIds = [];
         this.multiplayerManager = multiplayerManager;
         this.remotePlayers = remotePlayers || new Map(); // Map of playerId -> player data
-        this.selectedTargetPlayerId = null; // null = global/level chat, otherwise private chat with this player
+        this.selectedTarget = 'global'; // 'global', 'chain', or playerId for private chat
         this.currentPlayerId = null; // Store our own player ID for proper room filtering
+        this.currentChainId = null; // Store current chain ID
         this.isOpen = false; // Track drawer state
         this.toggleButton = null;
         this.isInitialized = false; // Prevent duplicate initialization
@@ -56,6 +58,7 @@ export class ChatUI {
         this.container.style.paddingBottom = '5vh';
         this.container.style.boxSizing = 'border-box';
         this.container.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        this.container.style.backdropFilter = 'blur(2px)';
         this.container.style.transition = 'left 0.3s ease-out'; // Smooth slide animation
 
         // Create toggle button
@@ -70,7 +73,7 @@ export class ChatUI {
         this.toggleButton.style.color = '#fff';
         this.toggleButton.style.border = '1px solid rgba(100, 100, 100, 0.5)';
         this.toggleButton.style.borderRadius = '0px';
-        this.toggleButton.style.cursor = 'pointer';
+        // this.toggleButton.style.cursor = 'pointer';
         this.toggleButton.style.fontSize = '14px';
         this.toggleButton.style.padding = '0';
         this.toggleButton.style.display = 'flex';
@@ -152,11 +155,20 @@ export class ChatUI {
         `;
         this.updatePlayerDropdown();
         this.targetPlayerDropdown.addEventListener('change', (e) => {
-            this.selectedTargetPlayerId = e.target.value === 'global' ? null : e.target.value;
+            // Check if trying to select disabled "My Chain" option
+            if (e.target.value === 'chain' && this.chainOption && this.chainOption.disabled) {
+                // Revert to global
+                this.selectedTarget = 'global';
+                this.targetPlayerDropdown.value = 'global';
+                this.addSystemMessage('Connect wallet to use chain chat');
+                return;
+            }
+
+            this.selectedTarget = e.target.value;
 
             // If selecting a player, join their private room to receive messages
-            if (this.selectedTargetPlayerId && this.multiplayerManager) {
-                this.multiplayerManager.joinPrivateChat(this.selectedTargetPlayerId);
+            if (this.selectedTarget !== 'global' && this.selectedTarget !== 'chain' && this.multiplayerManager) {
+                this.multiplayerManager.joinPrivateChat(this.selectedTarget);
             }
 
             // Re-render the message list when switching targets
@@ -209,6 +221,12 @@ export class ChatUI {
         });
         this.subscriptionIds.push(roomId);
 
+        // Listen to HERO_ATTRIBUTES_UPDATE to detect chainId changes
+        const heroAttrsId = events.on(HERO_ATTRIBUTES_UPDATE, this, (attributes) => {
+            this.onHeroAttributesUpdate(attributes);
+        });
+        this.subscriptionIds.push(heroAttrsId);
+
         // Input submission
         if (this.inputField) {
             this.inputField.addEventListener('keydown', (e) => {
@@ -252,18 +270,30 @@ export class ChatUI {
             }
 
             if (targetPlayerId) {
-                this.multiplayerManager.sendChatMessage(message, targetPlayerId);
+                this.multiplayerManager.sendChatMessage(message, targetPlayerId, 'private');
                 // Close drawer after sending message
                 // if (this.isOpen) {
                 //     this.toggleDrawer();
                 // }
             } else {
                 // Show error message
-                this.addSystemMessage(`Player "${playerName}" not found in this level`);
+                this.addSystemMessage(`Player "${playerName}" not found`);
             }
         } else {
-            // Normal message or to selected player
-            this.multiplayerManager.sendChatMessage(text, this.selectedTargetPlayerId);
+            // Normal message to selected target (global, chain, or player)
+            let targetPlayerId = null;
+            let mode = 'global';
+
+            if (this.selectedTarget === 'global') {
+                mode = 'global';
+            } else if (this.selectedTarget === 'chain') {
+                mode = 'chain';
+            } else {
+                // It's a player ID for private chat
+                targetPlayerId = this.selectedTarget;
+            }
+
+            this.multiplayerManager.sendChatMessage(text, targetPlayerId, mode);
             // Close drawer after sending message
             // if (this.isOpen) {
             //     this.toggleDrawer();
@@ -283,12 +313,21 @@ export class ChatUI {
         globalOption.textContent = 'Global';
         this.targetPlayerDropdown.appendChild(globalOption);
 
-        // Add level option
-        const levelOption = document.createElement('option');
-        levelOption.value = 'level';
-        levelOption.textContent = 'Level';
-        levelOption.disabled = true; // Not used since we send to both anyway
-        this.targetPlayerDropdown.appendChild(levelOption);
+        // Add chain option and store reference
+        const chainOption = document.createElement('option');
+        chainOption.value = 'chain';
+        // Display the actual chainId if available, otherwise show placeholder
+        chainOption.textContent = this.currentChainId || 'My Chain';
+        // Disable if no chainId available
+        chainOption.disabled = !this.currentChainId;
+        this.chainOption = chainOption; // Store reference for later enable/disable
+        this.targetPlayerDropdown.appendChild(chainOption);
+
+        // Add separator (visual divider)
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '--- Private Messages ---';
+        this.targetPlayerDropdown.appendChild(separator);
 
         // Add player options
         for (const [playerId, player] of this.remotePlayers) {
@@ -321,45 +360,45 @@ export class ChatUI {
         // Only display if it matches the current view
         if (this.shouldDisplayMessage(message)) {
 
-        // Create message element
-        const messageEl = document.createElement('div');
-        messageEl.style.cssText = `
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.style.cssText = `
             margin-bottom: 3px;
             padding: 2px;
             word-wrap: break-word;
             line-height: 1.2;
         `;
 
-        // Format: "PlayerName: message text" or "[PRIVATE] PlayerName: message"
-        const playerName = message.playerName || 'Unknown';
-        const text = message.text || '';
-        const isPrivate = message.room && message.room.startsWith('private:');
+            // Format: "PlayerName: message text" or "[PRIVATE] PlayerName: message"
+            const playerName = message.playerName || 'Unknown';
+            const text = message.text || '';
+            const isPrivate = message.room && message.room.startsWith('private:');
 
-        // Shorten player name for display in narrow column
-        const shortName = playerName.length > 8 ? playerName.substring(0, 8) + '.' : playerName;
+            // Shorten player name for display in narrow column
+            const shortName = playerName.length > 8 ? playerName.substring(0, 8) + '.' : playerName;
 
-        // Add [PRIVATE] indicator if it's a private message
-        if (isPrivate) {
-            const privateSpan = document.createElement('span');
-            privateSpan.style.color = '#ff9999';
-            privateSpan.style.fontWeight = 'bold';
-            privateSpan.textContent = '[PM] ';
-            messageEl.appendChild(privateSpan);
-        }
+            // Add [PRIVATE] indicator if it's a private message
+            if (isPrivate) {
+                const privateSpan = document.createElement('span');
+                privateSpan.style.color = '#ff9999';
+                privateSpan.style.fontWeight = 'bold';
+                privateSpan.textContent = '[PM] ';
+                messageEl.appendChild(privateSpan);
+            }
 
-        // Color code the player name for visibility
-        const nameSpan = document.createElement('span');
-        nameSpan.style.color = this.getColorForPlayer(message.playerId);
-        nameSpan.style.fontWeight = 'bold';
-        nameSpan.textContent = shortName;
+            // Color code the player name for visibility
+            const nameSpan = document.createElement('span');
+            nameSpan.style.color = this.getColorForPlayer(message.playerId);
+            nameSpan.style.fontWeight = 'bold';
+            nameSpan.textContent = shortName;
 
-        const colonSpan = document.createElement('span');
-        colonSpan.style.color = '#999';
-        colonSpan.textContent = ': ';
+            const colonSpan = document.createElement('span');
+            colonSpan.style.color = '#999';
+            colonSpan.textContent = ': ';
 
-        const textSpan = document.createElement('span');
-        textSpan.style.color = '#fff';
-        textSpan.textContent = text;
+            const textSpan = document.createElement('span');
+            textSpan.style.color = '#fff';
+            textSpan.textContent = text;
 
             messageEl.appendChild(nameSpan);
             messageEl.appendChild(colonSpan);
@@ -371,9 +410,16 @@ export class ChatUI {
     }
 
     shouldDisplayMessage(message) {
-        if (this.selectedTargetPlayerId === null) {
-            // Global/Level view: show all non-private messages
-            return !message.room || !message.room.startsWith('private:');
+        if (this.selectedTarget === 'global') {
+            // Global view: show only global messages (not chain-specific, not private)
+            return message.room === 'global-chat' || !message.room;
+        } else if (this.selectedTarget === 'chain') {
+            // Chain view: show only messages from the current chain
+            if (!this.currentChainId) {
+                return false; // Don't show chain messages if no chain connected
+            }
+            const expectedRoom = `chain:${this.currentChainId}`;
+            return message.room === expectedRoom;
         } else {
             // Private chat view: show only messages in the private room with this player
             if (!message.room || !message.room.startsWith('private:')) {
@@ -385,7 +431,7 @@ export class ChatUI {
             const [id1, id2] = this.extractPlayerIdsFromRoom(message.room);
 
             // Check if the selected player is one of the two in this room
-            return id1 === this.selectedTargetPlayerId || id2 === this.selectedTargetPlayerId;
+            return id1 === this.selectedTarget || id2 === this.selectedTarget;
         }
     }
 
@@ -467,20 +513,65 @@ export class ChatUI {
         }
     }
 
-    onRoomChanged(data) {
-        // Optional: Show level change notification
-        const notificationEl = document.createElement('div');
-        notificationEl.style.cssText = `
-            margin-bottom: 8px;
-            padding: 4px;
-            color: #666;
-            font-style: italic;
-            text-align: center;
-        `;
-        notificationEl.textContent = `--- Switched to level: ${data.levelId} ---`;
+    setChainOptionEnabled(isEnabled) {
+        // Find the chain option in the current dropdown and update it
+        if (this.targetPlayerDropdown) {
+            for (let option of this.targetPlayerDropdown.options) {
+                if (option.value === 'chain') {
+                    option.disabled = !isEnabled;
+                    // Update text to show chainId if enabled, otherwise "My Chain"
+                    option.textContent = isEnabled && this.currentChainId ? this.currentChainId : 'My Chain';
+                    this.chainOption = option; // Update stored reference
+                    return;
+                }
+            }
+        }
+    }
 
-        // this.messageList.appendChild(notificationEl);
-        // this.scrollToBottom();
+    onHeroAttributesUpdate(data) {
+        // data = { attributes: {...} } from Hero.broadcastAttributes()
+        const attributes = data.attributes || data;
+
+        // Enable "My Chain" option if player has a chainId
+        if (attributes && attributes.chainId) {
+            const oldChainId = this.currentChainId;
+            this.currentChainId = attributes.chainId;
+            this.setChainOptionEnabled(true);
+
+            // Update ChatManager's chainId so it sends messages to the correct room
+            if (this.multiplayerManager && this.multiplayerManager.chatManager) {
+                this.multiplayerManager.chatManager.onChainChanged(attributes.chainId);
+            }
+
+            // If chain changed and we're viewing chain messages, rerender to show only current chain
+            if (oldChainId !== this.currentChainId && this.selectedTarget === 'chain') {
+                this.rerenderMessages();
+            }
+        } else {
+            this.currentChainId = null;
+            this.setChainOptionEnabled(false);
+        }
+    }
+
+    onRoomChanged(data) {
+        // Update chainId when room changes
+        if (data.chainId) {
+            this.currentChainId = data.chainId;
+            this.setChainOptionEnabled(true);
+
+            const notificationEl = document.createElement('div');
+            notificationEl.style.cssText = `
+                margin-bottom: 8px;
+                padding: 4px;
+                color: #666;
+                font-style: italic;
+                text-align: center;
+            `;
+            notificationEl.textContent = `--- Switched to chain: ${data.chainId} ---`;
+
+            // this.messageList.appendChild(notificationEl);
+            // this.scrollToBottom();
+        }
     }
 
     getColorForPlayer(playerId) {

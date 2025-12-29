@@ -30,7 +30,7 @@ class Events {
 
   unsubscribe(caller) {
     this.callbacks = this.callbacks.filter(
-        (stored) => stored.caller !== caller,
+      (stored) => stored.caller !== caller,
     );
   }
 
@@ -42,5 +42,8 @@ export const CHAT_MESSAGE_SENT = 'CHAT_MESSAGE_SENT';
 export const CHAT_MESSAGE_RECEIVED = 'CHAT_MESSAGE_RECEIVED';
 export const CHAT_ROOM_CHANGED = 'CHAT_ROOM_CHANGED';
 export const CHAT_TYPING_INDICATOR = 'CHAT_TYPING_INDICATOR';
+
+// Hero Events
+export const HERO_ATTRIBUTES_UPDATE = 'HERO_ATTRIBUTES_UPDATE';
 
 export const events = new Events();

@@ -4,39 +4,49 @@ export class ChatManager {
     constructor(socket) {
         this.socket = socket;
         this.currentPlayerId = null;
-        this.currentLevelId = null;
+        this.currentChainId = null;
         this.joinedRooms = new Set(); // Track which rooms we're in
         this.setupSocketListeners();
     }
 
     // Server calls this when player joins global chat
-    initialize(playerId) {
+    initialize(playerId, chainId = null) {
         this.currentPlayerId = playerId;
+        this.currentChainId = chainId;
+
         this.socket.emit('chat-join-room', { room: 'global-chat' });
         this.joinedRooms.add('global-chat');
+
+        // Also join the chain room if chainId is provided
+        if (chainId) {
+            this.socket.emit('chat-join-room', { room: `chain:${chainId}` });
+            this.joinedRooms.add(`chain:${chainId}`);
+            console.log(`[ChatManager] Initialized with chainId: ${chainId}`);
+        }
     }
 
-    // Called when player changes level
-    onLevelChanged(newLevelId) {
-        const oldLevelId = this.currentLevelId;
-        this.currentLevelId = newLevelId;
+    // Called when player changes chain
+    onChainChanged(newChainId) {
+        const oldChainId = this.currentChainId;
+        this.currentChainId = newChainId;
 
-        // Leave old level room
-        if (oldLevelId) {
-            this.socket.emit('chat-leave-room', { room: `level:${oldLevelId}` });
-            this.joinedRooms.delete(`level:${oldLevelId}`);
+        // Leave old chain room
+        if (oldChainId) {
+            this.socket.emit('chat-leave-room', { room: `chain:${oldChainId}` });
+            this.joinedRooms.delete(`chain:${oldChainId}`);
         }
 
-        // Join new level room
-        const newLevelRoom = `level:${newLevelId}`;
-        this.socket.emit('chat-join-room', { room: newLevelRoom });
-        this.joinedRooms.add(newLevelRoom);
+        // Join new chain room
+        const newChainRoom = `chain:${newChainId}`;
+        this.socket.emit('chat-join-room', { room: newChainRoom });
+        this.joinedRooms.add(newChainRoom);
 
-        events.emit(CHAT_ROOM_CHANGED, { levelId: newLevelId });
+        events.emit(CHAT_ROOM_CHANGED, { chainId: newChainId });
     }
 
     // Send chat message
-    sendMessage(text, targetPlayerId = null) {
+    // targetPlayerId: null = use mode, or playerId = private chat
+    sendMessage(text, targetPlayerId = null, mode = 'global') {
         const message = {
             from: this.currentPlayerId,
             text: text,
@@ -56,8 +66,12 @@ export class ChatManager {
                 this.joinedRooms.add(normalizedRoom);
             }
         } else {
-            // Public message (goes to both global + level room)
-            message.rooms = ['global-chat', `level:${this.currentLevelId}`];
+            // Public message - send to selected mode
+            if (mode === 'global') {
+                message.room = 'global-chat';
+            } else if (mode === 'chain') {
+                message.room = `chain:${this.currentChainId}`;
+            }
         }
 
         this.socket.emit('chat-send-message', message);
