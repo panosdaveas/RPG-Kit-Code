@@ -80,8 +80,8 @@ export class MultiplayerManager {
     }
 
     // Expose method for UI/game to call
-    sendChatMessage(text, targetPlayerId = null) {
-        this.chatManager.sendMessage(text, targetPlayerId);
+    sendChatMessage(text, targetPlayerId = null, mode = 'global') {
+        this.chatManager.sendMessage(text, targetPlayerId, mode);
     }
 
     // Join a private chat room with a specific player

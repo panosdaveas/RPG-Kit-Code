@@ -4,7 +4,6 @@ export class ChatManager {
     constructor(socket) {
         this.socket = socket;
         this.currentPlayerId = null;
-        this.currentChainId = null;
         this.joinedRooms = new Set(); // Track which rooms we're in
         this.setupSocketListeners();
     }
@@ -25,23 +24,29 @@ export class ChatManager {
         }
     }
 
+    // Called when player changes level
+    // onLevelChanged(newLevelId) {
+    //     const oldLevelId = this.currentLevelId;
+    //     this.currentLevelId = newLevelId;
+    // }
+
     // Called when player changes chain
-    onChainChanged(newChainId) {
-        const oldChainId = this.currentChainId;
-        this.currentChainId = newChainId;
+    onLevelChanged(newLevelId) {
+        const oldLevelId = this.currentLevelId;
+        this.currentLevelId = newLevelId;
 
         // Leave old chain room
-        if (oldChainId) {
-            this.socket.emit('chat-leave-room', { room: `chain:${oldChainId}` });
-            this.joinedRooms.delete(`chain:${oldChainId}`);
+        if (oldLevelId) {
+            this.socket.emit('chat-leave-room', { room: `level:${oldLevelId}` });
+            this.joinedRooms.delete(`level:${oldLevelId}`);
         }
 
         // Join new chain room
-        const newChainRoom = `chain:${newChainId}`;
-        this.socket.emit('chat-join-room', { room: newChainRoom });
-        this.joinedRooms.add(newChainRoom);
+        const newLevelRoom = `chain:${newLevelId}`;
+        this.socket.emit('chat-join-room', { room: newLevelRoom });
+        this.joinedRooms.add(newLevelRoom);
 
-        events.emit(CHAT_ROOM_CHANGED, { chainId: newChainId });
+        events.emit(CHAT_ROOM_CHANGED, { chainId: newLevelId });
     }
 
     // Send chat message

@@ -21,6 +21,12 @@ export class Main extends GameObject {
     // Multiplayer
     this.multiplayerManager = new MultiplayerManager();
     this.remotePlayers = new Map(); // playerId -> RemoteHero instance
+
+    // Wallet
+    this.walletUI = null;
+
+    // Agent
+    this.agentUI = null;
   }
 
   ready() {
@@ -84,7 +90,7 @@ export class Main extends GameObject {
       }
 
       if (withObject instanceof RemoteHero) {
-        console.log("Interacting with remote player:", withObject.playerId);
+        console.log("Interacting with remote player:", withObject);
         // Handle remote player interaction here
         // For example, show their name, stats, trade menu, etc.
         return;
