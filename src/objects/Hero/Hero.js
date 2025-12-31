@@ -109,13 +109,36 @@ export class Hero extends GameObject {
     /** @type {Input} */
     const input = root.input;
     if (input?.getActionJustPressed("Space")) {
+      // Get the position the hero is facing
+      const facingPosition = this.position.toNeighbor(this.facingDirection);
+
       // Look for an object at the next space (according to where Hero is facing)
       const objAtPosition = this.parent.children.find(child => {
-        return child.position.matches(this.position.toNeighbor(this.facingDirection))
+        return child.position.matches(facingPosition)
       })
       if (objAtPosition) {
         events.emit("HERO_REQUESTS_ACTION", objAtPosition);
       }
+
+      // Debug feat
+      // Look for a tile at the facing position
+      const tiledMap = root.level?.tiledMap;
+      if (tiledMap && !objAtPosition) {
+        // Search through all tile layers
+        tiledMap.layers.forEach(layer => {
+          const tile = layer.tiles.find(t => t.x === facingPosition.x && t.y === facingPosition.y);
+          if (tile) {
+            const tileProps = tiledMap.getTileProperties(tile.tileId);
+            console.log("Tile found:", {
+              position: { x: tile.x, y: tile.y },
+              tileId: tile.tileId,
+              layer: layer.name,
+              properties: tileProps
+            });
+          }
+        });
+      }
+
     }
 
     // Track how long direction is held
