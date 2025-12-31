@@ -122,21 +122,23 @@ export class Hero extends GameObject {
 
       // Debug feat
       // Look for a tile at the facing position
-      const tiledMap = root.level?.tiledMap;
-      if (tiledMap && !objAtPosition) {
-        // Search through all tile layers
-        tiledMap.layers.forEach(layer => {
-          const tile = layer.tiles.find(t => t.x === facingPosition.x && t.y === facingPosition.y);
-          if (tile) {
-            const tileProps = tiledMap.getTileProperties(tile.tileId);
-            console.log("Tile found:", {
-              position: { x: tile.x, y: tile.y },
-              tileId: tile.tileId,
-              layer: layer.name,
-              properties: tileProps
-            });
-          }
-        });
+      if (!objAtPosition) {
+        const tiledMap = root.level?.tiledMap;
+        if (tiledMap) {
+          // Search through all tile layers
+          tiledMap.layers.forEach(layer => {
+            const tile = layer.tiles.find(t => t.x === facingPosition.x && t.y === facingPosition.y);
+            if (tile) {
+              const tileProps = tiledMap.getTileProperties(tile.tileId);
+              console.log("Tile found:", {
+                position: { x: tile.x / 16, y: tile.y / 16 },
+                tileId: tile.tileId,
+                layer: layer.name,
+                properties: tileProps
+              });
+            }
+          });
+        }
       }
 
     }
