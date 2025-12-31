@@ -5,6 +5,7 @@ export class TiledMap {
 
         this.layers = [];
         this.objects = [];
+        this.tileObjects = []; // Tile objects from object layers (have gid)
         this.tileProperties = new Map(); // tileId -> {solid, action, etc}
         this.animations = new Map(); // tileId -> animation config
         this.walls = new Set(); // For collision
@@ -136,6 +137,33 @@ export class TiledMap {
                 obj.properties.forEach(prop => {
                     parsed.properties[prop.name] = prop.value;
                 });
+            }
+
+            // If object has a gid, it's a tile object that should be rendered
+            if (obj.gid) {
+                const tileId = obj.gid - 1; // Tiled uses 1-based, we use 0-based
+                const tileX = obj.x;
+                const tileY = obj.y - obj.height; // Tiled places tile objects at bottom-left, we need top-left
+
+                this.tileObjects.push({
+                    tileId: tileId,
+                    x: tileX,
+                    y: tileY,
+                    width: obj.width,
+                    height: obj.height,
+                    name: obj.name,
+                    type: obj.type,
+                    properties: parsed.properties
+                });
+
+                // Check collision properties from tile properties or object properties
+                const tileProps = this.tileProperties.get(tileId) || {};
+                const hasCollision = parsed.properties.collide || tileProps.collide;
+
+                if (hasCollision) {
+                    const posKey = `${tileX},${tileY}`;
+                    this.walls.add(posKey);
+                }
             }
 
             this.objects.push(parsed);

@@ -7,6 +7,8 @@ export class TileLayerRenderer extends GameObject {
         this.tilesetImage = tiledMap.tilesetResource.image;
         this.tilesPerRow = 0; // Calculate from tileset
         this.isParsed = false;
+        this.animationTime = 0; // Track time for animations
+        this.tileAnimationStates = new Map(); // tileId -> current frame info
     }
 
     step(delta, root) {
@@ -18,7 +20,36 @@ export class TileLayerRenderer extends GameObject {
                 this.tilesetImage.width / this.tiledMap.tileWidth
             );
             this.isParsed = true;
+
+            // Initialize animation states
+            this.tiledMap.animations.forEach((animData, tileId) => {
+                this.tileAnimationStates.set(tileId, {
+                    currentFrameIndex: 0,
+                    timeInFrame: 0
+                });
+            });
         }
+
+        // Update animations
+        if (this.isParsed) {
+            this.animationTime += delta;
+            this.updateAnimations(delta);
+        }
+    }
+
+    updateAnimations(delta) {
+        this.tileAnimationStates.forEach((state, tileId) => {
+            const animData = this.tiledMap.getAnimation(tileId);
+            if (!animData) return;
+
+            state.timeInFrame += delta;
+            const currentFrame = animData.frames[state.currentFrameIndex];
+
+            if (state.timeInFrame >= currentFrame.duration) {
+                state.timeInFrame -= currentFrame.duration;
+                state.currentFrameIndex = (state.currentFrameIndex + 1) % animData.frames.length;
+            }
+        });
     }
 
     drawImage(ctx, drawPosX, drawPosY) {
@@ -43,10 +74,15 @@ export class TileLayerRenderer extends GameObject {
 
             ctx.restore();
         });
+
+        // Draw tile objects from object layers
+        this.tiledMap.tileObjects.forEach(tileObj => {
+            this.drawTile(ctx, tileObj, drawPosX, drawPosY);
+        });
     }
 
     drawTile(ctx, tile, offsetX, offsetY) {
-        const { tileId, x, y } = tile;
+        let { tileId, x, y } = tile;
         const tileDrawX = x + offsetX;
         const tileDrawY = y + offsetY;
         const tileWidth = this.tiledMap.tileWidth;
@@ -59,6 +95,14 @@ export class TileLayerRenderer extends GameObject {
             tileDrawY + tileHeight < -padding ||
             tileDrawY > ctx.canvas.height + padding) {
             return; // Skip rendering
+        }
+
+        // Check if this tile has an animation
+        const animState = this.tileAnimationStates.get(tileId);
+        if (animState) {
+            const animData = this.tiledMap.getAnimation(tileId);
+            const currentFrame = animData.frames[animState.currentFrameIndex];
+            tileId = currentFrame.tileId; // Use the animated frame's tileId
         }
 
         // Calculate source position in tileset

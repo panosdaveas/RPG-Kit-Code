@@ -482,7 +482,7 @@
             237, 378, 379, 380, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 238, 239, 240, 238, 239, 240, 235, 236, 237,
             377, 518, 519, 520, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 99, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 378, 379, 380, 378, 379, 380, 375, 376, 377,
             517, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 238, 239, 240, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 518, 519, 520, 518, 519, 520, 98, 99, 100,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 378, 379, 380, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 238, 239, 240,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2819, 0, 378, 379, 380, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 238, 239, 240,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 518, 519, 520, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 378, 379, 380,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 518, 519, 520,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -666,6 +666,91 @@
          "y":0
         }, 
         {
+         "draworder":"topdown",
+         "id":23,
+         "name":"Animated",
+         "objects":[
+                {
+                 "gid":2819,
+                 "height":16,
+                 "id":13,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"collide",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":352,
+                 "y":400
+                }, 
+                {
+                 "gid":8623,
+                 "height":16,
+                 "id":14,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"action",
+                         "type":"string",
+                         "value":"label"
+                        }, 
+                        {
+                         "name":"collide",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"content",
+                         "type":"string",
+                         "value":"Blue Label"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":384,
+                 "y":448
+                }, 
+                {
+                 "gid":8483,
+                 "height":16,
+                 "id":15,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"action",
+                         "type":"string",
+                         "value":"label"
+                        }, 
+                        {
+                         "name":"collide",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"content",
+                         "type":"string",
+                         "value":"Blue Label"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":384,
+                 "y":432
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -724,7 +809,7 @@
                 {
                  "gid":8622,
                  "height":16,
-                 "id":1,
+                 "id":11,
                  "name":"",
                  "properties":[
                         {
@@ -746,13 +831,13 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":416,
-                 "y":464
+                 "x":624,
+                 "y":384
                 }, 
                 {
                  "gid":8482,
                  "height":16,
-                 "id":2,
+                 "id":12,
                  "name":"",
                  "properties":[
                         {
@@ -763,7 +848,7 @@
                         {
                          "name":"collide",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"content",
@@ -774,8 +859,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":416,
-                 "y":448
+                 "x":624,
+                 "y":368
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1038,8 +1123,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":23,
- "nextobjectid":3,
+ "nextlayerid":24,
+ "nextobjectid":16,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -1048,11 +1133,11 @@
         {
          "columns":140,
          "firstgid":1,
-         "image":"..\/tilesets\/outdoor_tileset_16_x_16.png",
+         "image":"..\/..\/..\/..\/Library\/Mobile Documents\/com~apple~CloudDocs\/Tiles\/16x16\/pokemon_tileset_16_x_16.png",
          "imageheight":2400,
          "imagewidth":2240,
          "margin":0,
-         "name":"outdoor_tileset_16_x_16",
+         "name":"pokemon_tileset_16_x_16",
          "spacing":0,
          "tilecount":21000,
          "tileheight":16,
@@ -15976,6 +16061,24 @@
                         }]
                 }, 
                 {
+                 "animation":[
+                        {
+                         "duration":500,
+                         "tileid":2818
+                        }, 
+                        {
+                         "duration":500,
+                         "tileid":2958
+                        }],
+                 "id":2818,
+                 "properties":[
+                        {
+                         "name":"collide",
+                         "type":"bool",
+                         "value":true
+                        }]
+                }, 
+                {
                  "id":2883,
                  "properties":[
                         {
@@ -16093,6 +16196,15 @@
                         }]
                 }, 
                 {
+                 "id":2958,
+                 "properties":[
+                        {
+                         "name":"collide",
+                         "type":"bool",
+                         "value":true
+                        }]
+                }, 
+                {
                  "id":3023,
                  "properties":[
                         {
@@ -16181,7 +16293,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":3033,
                  "properties":[
@@ -16199,8 +16312,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":3163,
                  "properties":[
@@ -16812,7 +16924,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":3790,
                  "properties":[
@@ -16830,8 +16943,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":3792,
                  "properties":[
@@ -17443,7 +17555,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":4524,
                  "properties":[
@@ -17461,8 +17574,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":4526,
                  "properties":[
@@ -18074,7 +18186,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":4683,
                  "properties":[
@@ -18092,8 +18205,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":4686,
                  "properties":[
@@ -18705,7 +18817,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":4824,
                  "properties":[
@@ -18723,8 +18836,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":4826,
                  "properties":[
@@ -19336,7 +19448,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":5008,
                  "properties":[
@@ -19354,8 +19467,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":5010,
                  "properties":[
@@ -19967,7 +20079,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":5284,
                  "properties":[
@@ -19985,8 +20098,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":5286,
                  "properties":[
@@ -20598,7 +20710,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":5483,
                  "properties":[
@@ -20616,8 +20729,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":5485,
                  "properties":[
@@ -21229,7 +21341,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":5705,
                  "properties":[
@@ -21247,8 +21360,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":5707,
                  "properties":[
@@ -21860,7 +21972,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":5975,
                  "properties":[
@@ -21878,8 +21991,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":5977,
                  "properties":[
@@ -22491,7 +22603,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":6661,
                  "properties":[
@@ -22509,8 +22622,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":6793,
                  "properties":[
@@ -23202,7 +23314,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":7673,
                  "properties":[
@@ -23220,8 +23333,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":7675,
                  "properties":[
@@ -23843,7 +23955,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":8196,
                  "properties":[
@@ -23861,8 +23974,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":8198,
                  "properties":[
@@ -24387,7 +24499,7 @@
                         {
                          "name":"collide",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"content",
@@ -24539,7 +24651,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":8518,
                  "properties":[
@@ -24557,8 +24670,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":8621,
                  "properties":[
@@ -25195,7 +25307,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":9319,
                  "properties":[
@@ -25213,8 +25326,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":9325,
                  "properties":[
@@ -25831,7 +25943,8 @@
                          "type":"bool",
                          "value":false
                         }]
-                }, 
+                },
+            
                 {
                  "id":10957,
                  "properties":[
@@ -25849,8 +25962,7 @@
                          "type":"bool",
                          "value":false
                         }]
-                },
-            
+                }, 
                 {
                  "id":10960,
                  "properties":[
@@ -26462,7 +26574,8 @@
                          "type":"bool",
                          "value":true
                         }]
-                }, 
+                },
+            
                 {
                  "id":12356,
                  "properties":[
@@ -26480,8 +26593,7 @@
                          "type":"bool",
                          "value":true
                         }]
-                },
-            
+                }, 
                 {
                  "id":12358,
                  "properties":[

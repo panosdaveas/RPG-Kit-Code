@@ -9,6 +9,7 @@ export class Exit extends GameObject {
     super({
       position: new Vector2(x, y)
     });
+    this.hasTriggered = false;
     // this.addChild(new Sprite({
     //   resource: resources.images.exit
     // }))
@@ -22,7 +23,13 @@ export class Exit extends GameObject {
       const roundedHeroX = Math.round(pos.x);
       const roundedHeroY = Math.round(pos.y);
       if (roundedHeroX === this.position.x && roundedHeroY === this.position.y) {
-        events.emit("HERO_EXITS")
+        if (!this.hasTriggered) {
+          this.hasTriggered = true;
+          // Delay the exit by one frame to prevent flicker
+          setTimeout(() => {
+            events.emit("HERO_EXITS");
+          }, 0);
+        }
       }
     })
   }
