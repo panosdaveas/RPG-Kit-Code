@@ -21,12 +21,6 @@ export class Main extends GameObject {
     // Multiplayer
     this.multiplayerManager = new MultiplayerManager();
     this.remotePlayers = new Map(); // playerId -> RemoteHero instance
-
-    // Wallet
-    this.walletUI = null;
-
-    // Agent
-    this.agentUI = null;
   }
 
   ready() {
