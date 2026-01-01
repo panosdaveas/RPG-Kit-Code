@@ -19,7 +19,12 @@ class Resources {
       fontWhite: "/sprites/sprite-font-white.png",
       portraits: "/sprites/portraits-sheet.png",
       mainMapTileset: "/tilesets/outdoor_tileset_16_x_16.png",
-      blueRoomTileset: "/tilesets/public_indoor_tileset.png"
+      blueRoomTileset: "/tilesets/public_indoor_tileset.png",
+      // Rain effect
+      rain1: "/sprites/rain/rain_drops-01.png",
+      rain2: "/sprites/rain/rain_drops-02.png",
+      rain3: "/sprites/rain/rain_drops-03.png",
+      rain4: "/sprites/rain/rain_drops-04.png"
     };
 
     // JSON maps to download

@@ -1,0 +1,34 @@
+✅ Today's Progress:
+
+  1. ✅ Fixed exit flicker - setTimeout delay solved the double-hero rendering
+  2. ✅ Implemented depth-sorted tiles - TileSprite system working
+  3. ✅ Fixed async rendering - TILEMAP_PARSED event ensures proper timing
+  4. ✅ Depth sorting mostly working - Hero correctly goes behind/in front of tiles
+  5. ✅ Tile animations supported - Animated tiles in object layers work
+
+  🔍 To Debug Tomorrow:
+
+  - 1-frame flicker when Hero crosses TileSprite Y-threshold
+    - NPCs don't flicker (important clue!)
+    - Only affects TileSprites
+    - Happens when moving "around" objects
+
+  Possible causes to investigate:
+  - Y position calculation difference between NPCs and TileSprites
+  - Timing of when TileSprites are added to children array
+  - Sort stability when Y values are very close
+  - Frame interpolation during grid movement
+
+ hi! can you please take a look at the project? I want to tackle the 
+y-sorting issue i have: there are currently 2 entities that get drawn on 
+screen: 1. Game Objects - that follow the y-sorting corrreclty. 2. i have 
+tile created in Tiled that we parse nad render. Now, when a game object (my 
+hero) is behind a tile (e.g. a sign) we would like the sign to draw on top 
+of the hero. The thing is htat we parse all the tile layers and we add the 
+final renderer to the level as a child, so in the Game Object realm, the 
+whole map has a single y associated making it impossible to create the depth
+ effect. What can we do about this? My idea is to create a Tile game Object 
+and check the immediate surroundings of the player-let's say an 8x8 area. 
+Convert the tiles in that area into Game Objects and push them in the level 
+children so they can follow the y-sorting logic. Waht do you think? I'm open
+ to any ideas! 

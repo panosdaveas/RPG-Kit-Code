@@ -60,6 +60,9 @@ export class TileLayerRenderer extends GameObject {
         // Sort layers by zIndex
         const sortedLayers = [...this.tiledMap.layers].sort((a, b) => a.zIndex - b.zIndex);
 
+        // Get promoted tile positions from parent level (if available)
+        const promotedTiles = this.parent?.promotedTilePositions;
+
         // Draw each layer
         sortedLayers.forEach(layer => {
             if (!layer.visible) return;
@@ -75,14 +78,20 @@ export class TileLayerRenderer extends GameObject {
             ctx.restore();
         });
 
-        // Draw tile objects from object layers
+        // Draw tile objects from object layers (only those without 'depth' property)
+        // Tiles with 'depth' property are rendered as TileSprites for Y-sorting
         this.tiledMap.tileObjects.forEach(tileObj => {
-            this.drawTile(ctx, tileObj, drawPosX, drawPosY);
+            const tileProps = this.tiledMap.tileProperties.get(tileObj.tileId);
+            // Only render if it doesn't have the depth property (otherwise it's a TileSprite)
+            if (!tileProps || !tileProps.depth) {
+                this.drawTile(ctx, tileObj, drawPosX, drawPosY);
+            }
         });
     }
 
     drawTile(ctx, tile, offsetX, offsetY) {
         let { tileId, x, y } = tile;
+
         const tileDrawX = x + offsetX;
         const tileDrawY = y + offsetY;
         const tileWidth = this.tiledMap.tileWidth;

@@ -17,6 +17,8 @@ export class MainMapLevel extends Level {
         super({});
         this.levelId = "cave";
         this.multiplayerEnabled = true; // render remote players here
+        // this.rainEffect = true; // enable rain effect for this level
+        // this.timeOfDay = "night"; // dusk lighting for this level
 
         // Create TiledMap parser
         this.tiledMap = new TiledMap(
@@ -76,41 +78,9 @@ export class MainMapLevel extends Level {
         // Use walls from Tiled
         this.walls = this.tiledMap.walls;
 
-        // Spawn objects from Tiled object layer
-        const spawns = this.tiledMap.getObjectsByType("spawn");
-        const heroSpawn = spawns.find(s => s.name === "hero") || { x: 560, y: 400 };
-
-        this.heroStartPosition = params.heroPosition || new Vector2(heroSpawn.x, heroSpawn.y);
+        this.heroStartPosition = params.heroPosition || new Vector2(560, 400);
         const hero = new Hero(this.heroStartPosition.x, this.heroStartPosition.y);
         this.addChild(hero);
-
-        // Spawn items from object layer
-        const items = this.tiledMap.getObjectsByType("item");
-        items.forEach(item => {
-            if (item.name === "rod") {
-                const rod = new Rod(item.x, item.y);
-                this.addChild(rod);
-            }
-        });
-
-
-        // Spawn exits
-        const exits = this.tiledMap.getObjectsByType("exit");
-        exits.forEach(exitObj => {
-            const exit = new Exit(exitObj.x, exitObj.y);
-            console.log("Adding exit at", exitObj.x, exitObj.y);
-            this.addChild(exit);
-        });
-
-        // Spawn NPCs
-        const npcs = this.tiledMap.getObjectsByType("npc");
-        npcs.forEach(npcObj => {
-            const npc = new Npc(npcObj.x, npcObj.y, {
-                content: npcObj.properties.dialogue || "Hello!",
-                portraitFrame: npcObj.properties.portrait || 0
-            });
-            this.addChild(npc);
-        });
     }
 
     ready() {

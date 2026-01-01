@@ -9,6 +9,8 @@ import { MultiplayerManager } from "../../client/MultiplayerManager.js";
 import { RemoteHero } from "../Hero/RemoteHero.js";
 import { DebugHud } from "../DebugHud/DebugHud.js";
 import { ChatUI } from "../../client/ChatUI.js";
+import { ScreenRainEffect } from "../Effects/ScreenRainEffect.js";
+import { TimeOfDayEffect } from "../Effects/TimeOfDayEffect.js";
 
 
 export class Main extends GameObject {
@@ -30,6 +32,22 @@ export class Main extends GameObject {
 
     const debugHud = new DebugHud();
     this.addChild(debugHud);
+
+    this.rainEffect = new ScreenRainEffect();
+    // this.addChild(this.rainEffect);
+
+    // Enable rain effect if current level has it
+    if (this.level && this.level.rainEffect) {
+      this.rainEffect.enable();
+    }
+
+    this.timeOfDayEffect = new TimeOfDayEffect();
+    this.addChild(this.timeOfDayEffect);
+
+    // Set time of day if current level has it
+    if (this.level && this.level.timeOfDay) {
+      this.timeOfDayEffect.setState(this.level.timeOfDay);
+    }
 
     // Initialize multiplayer
     this.setupMultiplayer();
@@ -195,6 +213,24 @@ export class Main extends GameObject {
     this.remotePlayers.forEach(remoteHero => {
       this.updateRemoteHeroVisibility(remoteHero); // USE HELPER
     });
+
+    // Enable/disable rain effect based on level settings
+    if (this.rainEffect) {
+      if (newLevelInstance.rainEffect) {
+        this.rainEffect.enable();
+      } else {
+        this.rainEffect.disable();
+      }
+    }
+
+    // Set time of day based on level settings
+    if (this.timeOfDayEffect) {
+      if (newLevelInstance.timeOfDay) {
+        this.timeOfDayEffect.setState(newLevelInstance.timeOfDay);
+      } else {
+        this.timeOfDayEffect.setState('day'); // Default to day (no overlay)
+      }
+    }
   }
 
   // Add this new helper method in the Main class (after setupMultiplayer or wherever you prefer):
