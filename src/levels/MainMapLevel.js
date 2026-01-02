@@ -5,6 +5,7 @@ import { TileLayerRenderer } from "../objects/TileLayerRenderer/TileLayerRendere
 import { Hero } from "../objects/Hero/Hero.js";
 import { Exit } from "../objects/Exit/Exit.js";
 import { Rod } from "../objects/Rod/Rod.js";
+import { Chest } from "../objects/Chest/Chest.js";
 import { Npc } from "../objects/Npc/Npc.js";
 import { Vector2 } from "../Vector2.js";
 import { events } from "../Events.js";
@@ -65,6 +66,9 @@ export class MainMapLevel extends Level {
 
         const rod = new Rod(gridCells(37), gridCells(25))
         this.addChild(rod);
+
+        const chest = new Chest(gridCells(34), gridCells(25))
+        this.addChild(chest);
 
         const exit = new Exit(gridCells(11), gridCells(27))
         this.addChild(exit);

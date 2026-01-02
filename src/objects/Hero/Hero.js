@@ -90,6 +90,17 @@ export class Hero extends GameObject {
     events.on("UI_CLOSED", this, () => {
       this.isLocked = false;
     })
+    events.on("UPDATE_HERO", this, (attr) => {
+      const currentAttr = this.attributes.get(attr.name) || 0;
+      if (typeof this.attributes.get(attr.name) === 'number') {
+        this.attributes.set(attr.name, currentAttr + attr.value);
+      } else {
+        this.attributes.set(attr.name, attr.value);
+      }
+      this.broadcastAttributes();
+      console.log(this.attributes.getAll());
+      // console.log(`${attr.name} increased by ${attr.value}! New ${attr.name}: ${currentAttr + attr.value}`);
+    })
   }
 
   step(delta, root) {
@@ -276,7 +287,7 @@ export class Hero extends GameObject {
     this.addChild(this.itemPickupShell);
 
     // Test attributes transmition
-    this.attributes.set('health', "100");
+    this.attributes.set('health', 100);
     this.broadcastAttributes(); // Send update to server
     console.log(this.attributes.getAll());
   }

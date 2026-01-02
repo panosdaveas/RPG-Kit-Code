@@ -5,6 +5,7 @@ class Resources {
       hero: "/sprites/hero.png",
       shadow: "/sprites/shadow.png",
       rod: "/sprites/rod.png",
+      chest: "/sprites/chest.png",
       exit: "/sprites/exit.png",
       // Outdoor
       sky: "/sprites/sky.png",
