@@ -130,6 +130,10 @@ export class Hero extends GameObject {
       })
       if (objAtPosition) {
         events.emit("HERO_REQUESTS_ACTION", objAtPosition);
+        const size = Object.getOwnPropertyNames(objAtPosition);
+        console.log(size);
+        console.log(`Object size: ~${size} bytes (${(size / 1024).toFixed(2)} KB)`);
+        console.log(objAtPosition);
       }
 
       // Debug feat

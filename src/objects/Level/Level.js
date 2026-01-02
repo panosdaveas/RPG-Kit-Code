@@ -51,7 +51,9 @@ export class Level extends GameObject {
           tile.tileId,
           tile.x,
           tile.y,
-          this.tiledMap
+          this.tiledMap,
+          tileProps,
+          null // Regular layer tiles don't have names
         );
         this.addChild(tileSprite);
         this.promotedTilePositions.add(key); // Track to avoid duplicates
@@ -67,11 +69,16 @@ export class Level extends GameObject {
       const tileProps = this.tiledMap.tileProperties.get(tileObj.tileId);
       if (!tileProps || !tileProps.depth) continue; // Skip tiles without depth property
 
+      // Merge tile properties with object properties (object properties override)
+      const mergedProps = { ...tileProps, ...tileObj.properties };
+
       const tileSprite = new TileSprite(
         tileObj.tileId,
         tileObj.x,
         tileObj.y,
-        this.tiledMap
+        this.tiledMap,
+        mergedProps,
+        tileObj.name // Object layer tiles have names
       );
       this.addChild(tileSprite);
       tileCount++;

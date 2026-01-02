@@ -6,12 +6,13 @@ import { Vector2 } from "../../Vector2.js";
  * Participates in Y-sorting with GameObjects but has minimal overhead.
  */
 export class TileSprite extends GameObject {
-  constructor(tileId, x, y, tiledMap) {
+  constructor(tileId, x, y, tiledMap, properties = {}, name = null) {
     // Position at BOTTOM of tile for proper Y-sorting with hero
     super({ position: new Vector2(x, y + tiledMap.tileHeight) });
 
     this.tileId = tileId;
-    this.tiledMap = tiledMap;
+    this.name = name;
+    this.properties = properties;
     this.tilesetImage = tiledMap.tilesetResource.image;
     this.tileWidth = tiledMap.tileWidth;
     this.tileHeight = tiledMap.tileHeight;
