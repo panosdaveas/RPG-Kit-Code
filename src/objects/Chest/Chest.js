@@ -56,8 +56,11 @@ export class Chest extends GameObject {
     }
 
     ready() {
-        events.on("HERO_REQUESTS_ACTION", this, () => {
+        events.on("HERO_REQUESTS_ACTION", this, (withObject) => {
+            // Only respond if the hero is interacting with THIS chest
+            if (withObject === this) {
                 this.onInteractWithHero();
+            }
         })
     }
 
