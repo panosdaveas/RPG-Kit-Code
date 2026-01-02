@@ -1211,6 +1211,11 @@
                          "name":"content",
                          "type":"string",
                          "value":"Red Label"
+                        }, 
+                        {
+                         "name":"depth",
+                         "type":"bool",
+                         "value":true
                         }],
                  "rotation":0,
                  "type":"",
@@ -43279,6 +43284,11 @@
                          "name":"content",
                          "type":"string",
                          "value":"Red Label"
+                        }, 
+                        {
+                         "name":"depth",
+                         "type":"bool",
+                         "value":true
                         }]
                 }, 
                 {
