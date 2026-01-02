@@ -55,7 +55,11 @@ export class GameObject {
         return 1;
       }
 
-      return a.position.y > b.position.y ? 1 : -1
+      // Use sortingOffsetY if defined, otherwise default to 0
+      const aSortY = a.position.y + (a.sortingOffsetY ?? 0);
+      const bSortY = b.position.y + (b.sortingOffsetY ?? 0);
+
+      return aSortY > bSortY ? 1 : -1
     })
   }
 

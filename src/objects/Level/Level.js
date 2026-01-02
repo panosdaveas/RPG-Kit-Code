@@ -41,7 +41,8 @@ export class Level extends GameObject {
         const tileProps = this.tiledMap.tileProperties.get(tile.tileId);
         if (!tileProps || !tileProps.depth) continue; // Skip tiles without depth property
 
-        const key = `${tile.x},${tile.y}`;
+        // Include layer zIndex in key to only skip THIS layer's tile, not tiles below it
+        const key = `${layer.zIndex},${tile.x},${tile.y}`;
 
         // Only create one TileSprite per position (skip if already promoted)
         if (this.promotedTilePositions.has(key)) continue;

@@ -61,6 +61,7 @@ export class Hero extends GameObject {
     this.itemPickupShell = null;
     this.isLocked = false;
     this.isSolid = true;
+    this.sortingOffsetY = 1; // Offset hero's sorting position for y-sorting
     this.attributes = new HeroAttributes();
     this.currentLevelId = null;
 

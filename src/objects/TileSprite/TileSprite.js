@@ -8,8 +8,7 @@ import { Vector2 } from "../../Vector2.js";
 export class TileSprite extends GameObject {
   constructor(tileId, x, y, tiledMap) {
     // Position at BOTTOM of tile for proper Y-sorting with hero
-    // Substract small offset (2px) to reduce flicker when hero crosses threshold
-    super({ position: new Vector2(x, y + tiledMap.tileHeight -2 ) });
+    super({ position: new Vector2(x, y + tiledMap.tileHeight) });
 
     this.tileId = tileId;
     this.tiledMap = tiledMap;
