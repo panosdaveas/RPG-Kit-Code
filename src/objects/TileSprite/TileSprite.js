@@ -1,5 +1,6 @@
 import { GameObject } from "../../GameObject.js";
 import { Vector2 } from "../../Vector2.js";
+import { Light } from "../Light/Light.js";
 
 /**
  * Lightweight sprite for depth-sorted tiles from Tiled object layers.
@@ -34,6 +35,13 @@ export class TileSprite extends GameObject {
     }
 
     this.updateSourceCoordinates();
+
+    // this.addChild(this.sprite);
+    if (this.properties.highlight) {
+      const light = new Light(4, 0.8); // 60px radius, 80% intensity
+      light.position = new Vector2(8, 2); // Slightly above NPC's feet
+      this.addChild(light);
+    }
   }
 
   updateSourceCoordinates() {
