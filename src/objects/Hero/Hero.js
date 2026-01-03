@@ -20,6 +20,7 @@ import {
 } from "./heroAnimations.js";
 import { moveTowards } from "../../helpers/moveTowards.js";
 import { events } from "../../Events.js";
+import { Light } from "../Light/Light.js";
 
 export class Hero extends GameObject {
   constructor(x, y) {
@@ -54,6 +55,11 @@ export class Hero extends GameObject {
       })
     })
     this.addChild(this.body);
+
+    // Add light source for night mode
+    const light = new Light(140, 1); // 60px radius, 80% intensity
+    light.position = new Vector2(0, -10); // Slightly above hero's feet
+    this.addChild(light);
 
     this.facingDirection = DOWN;
     this.destinationPosition = this.position.duplicate();

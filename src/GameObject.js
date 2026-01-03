@@ -44,8 +44,14 @@ export class GameObject {
     // Do the actual rendering for Images
     this.drawImage(ctx, drawPosX, drawPosY);
 
-    // Pass on to children
-    this.getDrawChildrenOrdered().forEach((child) => child.draw(ctx, drawPosX, drawPosY));
+    // Pass on to children (skip children with special draw layers like HUD or LIGHTS)
+    this.getDrawChildrenOrdered().forEach((child) => {
+      // Skip children with HUD or LIGHTS drawLayer (they render in separate passes)
+      if (child.drawLayer === "HUD" || child.drawLayer === "LIGHTS") {
+        return;
+      }
+      child.draw(ctx, drawPosX, drawPosY);
+    });
   }
 
   getDrawChildrenOrdered() {

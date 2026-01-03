@@ -22,7 +22,12 @@ ctx.scale(dpr, dpr);
 const mainScene = new Main({
   position: new Vector2(0,0)
 })
-mainScene.setLevel(new MainMapLevel())
+mainScene.setLevel(new MainMapLevel({
+  effects: {
+    timeOfDay: "night", // Set time of day: "day", "dusk", or "night"
+    // rain: true,       // Example: add more effects
+  }
+}))
 
 // Establish update and draw loops
 const update = (delta) => {

@@ -1,11 +1,13 @@
 import {GameObject} from "../../GameObject.js";
 import {TileSprite} from "../TileSprite/TileSprite.js";
+import {Effects} from "../../Effects.js";
 
 export class Level extends GameObject {
   constructor() {
     super({});
     this.background = null;
     this.dynamicTilesCreated = false;
+    this.effects = new Effects(); // Visual/environmental effects for this level
   }
 
   step(delta, root) {

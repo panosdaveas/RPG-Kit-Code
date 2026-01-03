@@ -12,14 +12,16 @@ import { events } from "../Events.js";
 import { gridCells } from "../helpers/grid.js";
 import { BlueRoom } from "./BlueRoom.js";
 import { TALKED_TO_A, TALKED_TO_B } from "../StoryFlags.js";
+import { Effects } from "../Effects.js";
 
 export class MainMapLevel extends Level {
     constructor(params = {}) {
         super({});
         this.levelId = "cave";
         this.multiplayerEnabled = true; // render remote players here
-        // this.rainEffect = true; // enable rain effect for this level
-        // this.timeOfDay = "night"; // dusk lighting for this level
+
+        // Initialize effects from params
+        this.effects = new Effects(params.effects || {});
 
         // Create TiledMap parser
         this.tiledMap = new TiledMap(

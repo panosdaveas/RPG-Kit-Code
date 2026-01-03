@@ -11,6 +11,9 @@ import { DebugHud } from "../DebugHud/DebugHud.js";
 import { ChatUI } from "../../client/ChatUI.js";
 import { ScreenRainEffect } from "../Effects/ScreenRainEffect.js";
 import { TimeOfDayEffect } from "../Effects/TimeOfDayEffect.js";
+import { LightingSystem } from "../../LightingSystem.js";
+import { Effects } from "../../Effects.js";
+import { TimeOfDayToggle } from "../TimeOfDayToggle/TimeOfDayToggle.js";
 
 
 export class Main extends GameObject {
@@ -19,6 +22,8 @@ export class Main extends GameObject {
     this.level = null;
     this.input = new Input();
     this.camera = new Camera();
+    this.lightingSystem = new LightingSystem();
+    this.effects = new Effects(); // Store effects across level changes
 
     // Multiplayer
     this.multiplayerManager = new MultiplayerManager();
@@ -33,11 +38,16 @@ export class Main extends GameObject {
     const debugHud = new DebugHud();
     this.addChild(debugHud);
 
+    // Initialize time of day toggle (DOM element, not a GameObject)
+    const timeOfDayToggle = new TimeOfDayToggle();
+    timeOfDayToggle.initialize();
+    this.timeOfDayToggle = timeOfDayToggle;
+
     this.rainEffect = new ScreenRainEffect();
     // this.addChild(this.rainEffect);
 
     // Enable rain effect if current level has it
-    if (this.level && this.level.rainEffect) {
+    if (this.level && this.level.effects.get('rain')) {
       this.rainEffect.enable();
     }
 
@@ -45,8 +55,8 @@ export class Main extends GameObject {
     this.addChild(this.timeOfDayEffect);
 
     // Set time of day if current level has it
-    if (this.level && this.level.timeOfDay) {
-      this.timeOfDayEffect.setState(this.level.timeOfDay);
+    if (this.level && this.level.effects.has('timeOfDay')) {
+      this.timeOfDayEffect.setState(this.level.effects.get('timeOfDay'));
     }
 
     // Initialize multiplayer
@@ -62,8 +72,30 @@ export class Main extends GameObject {
       this.chatUI.currentPlayerId = playerId;
     });
 
+    // Handle time of day changes from toggle button
+    events.on('TIME_OF_DAY_CHANGED', this, (newMode) => {
+      // Update level effects
+      if (this.level) {
+        this.level.effects.set('timeOfDay', newMode);
+        this.effects.set('timeOfDay', newMode);
+      }
+
+      // Update TimeOfDayEffect
+      if (this.timeOfDayEffect) {
+        this.timeOfDayEffect.setState(newMode);
+      }
+    });
+
     // Change Level handler
     events.on("CHANGE_LEVEL", this, newLevelInstance => {
+      // Apply stored effects to outdoor levels that should preserve them
+      if (newLevelInstance.constructor.name === 'MainMapLevel') {
+        // Merge Main's stored effects with level's effects (level takes priority)
+        const storedEffects = new Effects(this.effects.getAll());
+        storedEffects.mergeWith(newLevelInstance.effects);
+        newLevelInstance.effects = storedEffects;
+      }
+
       this.setLevel(newLevelInstance);
       // Notify chat system of level change
       const levelId = newLevelInstance.levelId;
@@ -194,6 +226,12 @@ export class Main extends GameObject {
       this.level.destroy();
     }
 
+    // Store effects from the new level
+    if (newLevelInstance.effects.has('timeOfDay')) {
+      this.effects.set('timeOfDay', newLevelInstance.effects.get('timeOfDay'));
+    }
+    // Note: Indoor rooms don't set timeOfDay effect, so they won't have lighting effects
+
     this.level = newLevelInstance;
     this.addChild(this.level);
 
@@ -216,7 +254,7 @@ export class Main extends GameObject {
 
     // Enable/disable rain effect based on level settings
     if (this.rainEffect) {
-      if (newLevelInstance.rainEffect) {
+      if (newLevelInstance.effects.get('rain')) {
         this.rainEffect.enable();
       } else {
         this.rainEffect.disable();
@@ -225,8 +263,8 @@ export class Main extends GameObject {
 
     // Set time of day based on level settings
     if (this.timeOfDayEffect) {
-      if (newLevelInstance.timeOfDay) {
-        this.timeOfDayEffect.setState(newLevelInstance.timeOfDay);
+      if (newLevelInstance.effects.has('timeOfDay')) {
+        this.timeOfDayEffect.setState(newLevelInstance.effects.get('timeOfDay'));
       } else {
         this.timeOfDayEffect.setState('day'); // Default to day (no overlay)
       }
@@ -259,9 +297,36 @@ export class Main extends GameObject {
     });
   }
 
+  // Recursively collect all objects with a specific drawLayer
+  collectObjectsWithDrawLayer(obj, layer, collected = []) {
+    if (obj.drawLayer === layer) {
+      collected.push(obj);
+    }
+    if (obj.children) {
+      obj.children.forEach(child => {
+        this.collectObjectsWithDrawLayer(child, layer, collected);
+      });
+    }
+    return collected;
+  }
+
   drawForeground(ctx) {
+    // Handle TimeOfDayEffect first (render behind HUD)
+    const timeOfDayEffect = this.children.find(c => c.constructor.name === 'TimeOfDayEffect');
+    if (timeOfDayEffect) {
+      // Use lighting system for night and dusk modes
+      if (timeOfDayEffect.currentState === 'night' || timeOfDayEffect.currentState === 'dusk') {
+        const lights = this.collectObjectsWithDrawLayer(this, "LIGHTS");
+        this.lightingSystem.render(ctx, timeOfDayEffect, lights, this.camera);
+      } else {
+        // For day, render TimeOfDayEffect normally (or no overlay)
+        timeOfDayEffect.draw(ctx, 0, 0);
+      }
+    }
+
+    // Draw HUD layer on top (UI, etc.) but NOT TimeOfDayEffect
     this.children.forEach(child => {
-      if (child.drawLayer === "HUD") {
+      if (child.drawLayer === "HUD" && child.constructor.name !== 'TimeOfDayEffect') {
         child.draw(ctx, 0, 0);
       }
     });
