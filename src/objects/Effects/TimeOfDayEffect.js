@@ -19,7 +19,8 @@ export class TimeOfDayEffect extends GameObject {
         blendMode: 'multiply'
       },
       night: {
-        color: 'rgba(20, 20, 60, 0.55)', // Dark blue
+        // color: 'rgba(20, 20, 60, 0.55)', // Dark blue
+        color: 'rgba(9, 9, 43, 0.55)', // Dark blue
         blendMode: 'multiply'
       }
     };

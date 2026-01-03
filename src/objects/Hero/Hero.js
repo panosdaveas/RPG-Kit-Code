@@ -57,8 +57,8 @@ export class Hero extends GameObject {
     this.addChild(this.body);
 
     // Add light source for night mode
-    const light = new Light(140, 1); // 60px radius, 80% intensity
-    light.position = new Vector2(0, -10); // Slightly above hero's feet
+    const light = new Light(144, 1); // 60px radius, 80% intensity
+    light.position = new Vector2(16, -10); // Slightly above hero's feet
     this.addChild(light);
 
     this.facingDirection = DOWN;
