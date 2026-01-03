@@ -1093,6 +1093,11 @@
                          "name":"depth",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"interactive",
+                         "type":"bool",
+                         "value":true
                         }],
                  "rotation":0,
                  "type":"",
@@ -1124,6 +1129,11 @@
                         }, 
                         {
                          "name":"depth",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"interactive",
                          "type":"bool",
                          "value":true
                         }],
@@ -1225,6 +1235,11 @@
                          "name":"depth",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"interactive",
+                         "type":"bool",
+                         "value":true
                         }],
                  "rotation":0,
                  "type":"",
@@ -1256,6 +1271,11 @@
                         }, 
                         {
                          "name":"depth",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"interactive",
                          "type":"bool",
                          "value":true
                         }],
@@ -42979,6 +42999,11 @@
                          "name":"depth",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"interactive",
+                         "type":"bool",
+                         "value":true
                         }]
                 }, 
                 {
@@ -43537,6 +43562,11 @@
                         }, 
                         {
                          "name":"depth",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"interactive",
                          "type":"bool",
                          "value":true
                         }]

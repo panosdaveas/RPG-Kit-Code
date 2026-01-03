@@ -72,11 +72,10 @@ export class TileLayerRenderer extends GameObject {
             // ctx.globalAlpha = 0;
 
             layer.tiles.forEach(tile => {
-                // Skip tiles that have been promoted to TileSprites for depth sorting
-                // Use layer.zIndex in key to only skip this specific layer's tile
-                const key = `${layer.zIndex},${tile.x},${tile.y}`;
-                if (promotedTiles && promotedTiles.has(key)) {
-                    return; // This tile is rendered as a TileSprite, skip it here
+                // Skip tiles that have the 'depth' property - they're rendered as TileSprites
+                const tileProps = this.tiledMap.tileProperties.get(tile.tileId);
+                if (tileProps && tileProps.depth) {
+                    return; // This tile has depth property, skip it (rendered as TileSprite)
                 }
                 this.drawTile(ctx, tile, drawPosX, drawPosY);
             });
