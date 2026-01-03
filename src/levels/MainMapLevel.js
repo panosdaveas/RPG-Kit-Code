@@ -32,7 +32,7 @@ export class MainMapLevel extends Level {
         // this.tiledMap.parse();
         this.setupLevel(params);
 
-        const npc1 = new Npc(gridCells(38), gridCells(30), {
+        const npc1 = new Npc(gridCells(49), gridCells(20), {
             //content: "I am the first NPC!",
             content: [
                 {

@@ -28,8 +28,7 @@ export class Level extends GameObject {
       this.tiledMap.parse();
     }
 
-    // Track which tile positions have been promoted to TileSprites
-    // This will be used by TileLayerRenderer to skip those tiles
+    // Track which tile positions have been promoted to TileSprites (for future use)
     this.promotedTilePositions = new Set();
 
     let tileCount = 0;
@@ -43,7 +42,7 @@ export class Level extends GameObject {
         const tileProps = this.tiledMap.tileProperties.get(tile.tileId);
         if (!tileProps || !tileProps.depth) continue; // Skip tiles without depth property
 
-        // Include layer zIndex in key to only skip THIS layer's tile, not tiles below it
+        // Include layer zIndex in key for future layer-specific logic
         const key = `${layer.zIndex},${tile.x},${tile.y}`;
 
         // Only create one TileSprite per position (skip if already promoted)
@@ -58,7 +57,7 @@ export class Level extends GameObject {
           null // Regular layer tiles don't have names
         );
         this.addChild(tileSprite);
-        this.promotedTilePositions.add(key); // Track to avoid duplicates
+        this.promotedTilePositions.add(key); // Track for future use
         tileCount++;
       }
     }

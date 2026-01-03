@@ -5,6 +5,7 @@ import { resources } from "../../Resource.js";
 import { events } from "../../Events.js";
 import { Animations } from "../../Animations.js";
 import { FrameIndexPattern } from "../../FrameIndexPattern.js";
+import { Light } from "../Light/Light.js";
 
 export class Chest extends GameObject {
     constructor(x, y) {
@@ -53,6 +54,9 @@ export class Chest extends GameObject {
         this.sprite.animations.play("closed");
 
         this.addChild(this.sprite);
+        const light = new Light(5, 1); // 60px radius, 80% intensity
+        light.position = new Vector2(8, 4); // Slightly above NPC's feet
+        this.addChild(light);
     }
 
     ready() {
