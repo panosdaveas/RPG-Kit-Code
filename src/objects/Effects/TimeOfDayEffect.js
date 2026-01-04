@@ -15,7 +15,7 @@ export class TimeOfDayEffect extends GameObject {
     this.states = {
       day: null, // No overlay during day
       dusk: {
-        color: 'rgba(255, 120, 80, 0.35)', // Warm orange/pink
+        color: 'rgba(116, 30, 4, 0.35)', // Warm orange/pink
         blendMode: 'multiply'
       },
       night: {

@@ -72,7 +72,7 @@ export class MainMapLevel extends Level {
         const chest = new Chest(gridCells(34), gridCells(25))
         this.addChild(chest);
 
-        const exit = new Exit(gridCells(25), gridCells(22))
+        const exit = new Exit(gridCells(25), gridCells(22.5))
         this.addChild(exit);
     }
 
