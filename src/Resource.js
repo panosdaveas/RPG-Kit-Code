@@ -15,6 +15,7 @@ class Resources {
       caveGround: "/sprites/cave-ground.png",
       // NPCs
       knight: "/sprites/knight-sheet-1.png",
+      npcOldMan: "/sprites/npcOldMan.png",
       // HUD
       textBox: "/sprites/text-box.png",
       fontWhite: "/sprites/sprite-font-white.png",
