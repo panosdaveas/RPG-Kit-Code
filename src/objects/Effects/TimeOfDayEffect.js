@@ -1,5 +1,5 @@
 import { GameObject } from "../../GameObject.js";
-import { DISPLAY, TIME_OF_DAY } from "../../constants.js";
+import { DISPLAY, TIME_OF_DAY } from "../../Constants.js";
 
 /**
  * Manages time-of-day lighting effects using screen overlays.

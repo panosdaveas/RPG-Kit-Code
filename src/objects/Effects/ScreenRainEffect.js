@@ -1,6 +1,6 @@
 import { GameObject } from "../../GameObject.js";
 import { resources } from "../../Resource.js";
-import { DISPLAY, RAIN } from "../../constants.js";
+import { DISPLAY, RAIN } from "../../Constants.js";
 
 /**
  * Screen-fixed rain effect that doesn't move with the camera.

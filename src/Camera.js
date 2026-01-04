@@ -1,7 +1,7 @@
 import { GameObject } from "./GameObject.js";
 import { events } from "./Events.js";
 import { Vector2 } from "./Vector2.js";
-import { DISPLAY, CAMERA, SPRITE } from "./constants.js";
+import { DISPLAY, CAMERA, SPRITE } from "./Constants.js";
 
 export class Camera extends GameObject {
   constructor() {

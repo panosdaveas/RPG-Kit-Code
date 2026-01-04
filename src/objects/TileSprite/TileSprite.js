@@ -1,7 +1,7 @@
 import { GameObject } from "../../GameObject.js";
 import { Vector2 } from "../../Vector2.js";
 import { Light } from "../Light/Light.js";
-import { DISPLAY, CULLING, LIGHTING } from "../../constants.js";
+import { DISPLAY, CULLING, LIGHTING } from "../../Constants.js";
 
 /**
  * Lightweight sprite for depth-sorted tiles from Tiled object layers.

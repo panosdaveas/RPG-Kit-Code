@@ -1,4 +1,4 @@
-import { DISPLAY, LIGHTING } from './constants.js';
+import { DISPLAY, LIGHTING } from './Constants.js';
 
 /**
  * Handles rendering of the night overlay with pixelated light sources.

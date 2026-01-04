@@ -1,6 +1,6 @@
 import { Vector2 } from "./Vector2.js";
 import { GameObject } from "./GameObject.js";
-import { SPRITE, CULLING } from "./constants.js";
+import { SPRITE, CULLING } from "./Constants.js";
 
 export class Sprite extends GameObject {
   constructor({
