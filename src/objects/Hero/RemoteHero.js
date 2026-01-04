@@ -15,6 +15,7 @@ import {
     WALK_RIGHT,
     WALK_UP
 } from "./heroAnimations.js";
+import { Light } from "../Light/Light.js";
 
 export class RemoteHero extends GameObject {
     constructor(playerId, x, y) {
@@ -55,6 +56,10 @@ export class RemoteHero extends GameObject {
             })
         });
         this.addChild(this.body);
+
+        const light = new Light(4, 0.7); // 60px radius, 80% intensity
+        light.position = new Vector2(8, 2); // Slightly above NPC's feet
+        this.addChild(light);
     }
 
     // Update from network data

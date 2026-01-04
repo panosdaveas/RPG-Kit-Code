@@ -28,6 +28,18 @@ export class Main extends GameObject {
     // Multiplayer
     this.multiplayerManager = new MultiplayerManager();
     this.remotePlayers = new Map(); // playerId -> RemoteHero instance
+
+    // Performance optimization: cache collections by drawLayer
+    // Map<layerName, array of objects>
+    this._layerCache = new Map();
+    this._layerCacheDirty = true;
+  }
+
+  // Override stepEntry to invalidate layer cache each frame
+  stepEntry(delta, root) {
+    // Invalidate layer cache since children deep in tree may add/remove objects
+    this._layerCacheDirty = true;
+    super.stepEntry(delta, root);
   }
 
   ready() {
@@ -226,6 +238,9 @@ export class Main extends GameObject {
       this.level.destroy();
     }
 
+    // Invalidate layer cache when level changes
+    this._layerCacheDirty = true;
+
     // Store effects from the new level
     if (newLevelInstance.effects.has('timeOfDay')) {
       this.effects.set('timeOfDay', newLevelInstance.effects.get('timeOfDay'));
@@ -288,6 +303,18 @@ export class Main extends GameObject {
     }
   }
 
+  // Override addChild to invalidate layer cache
+  addChild(gameObject) {
+    super.addChild(gameObject);
+    this._layerCacheDirty = true;
+  }
+
+  // Override removeChild to invalidate layer cache
+  removeChild(gameObject) {
+    super.removeChild(gameObject);
+    this._layerCacheDirty = true;
+  }
+
   drawObjects(ctx) {
     // const hero = this.level.children.find(c => c.constructor.name === 'Hero');
     this.children.forEach(child => {
@@ -310,13 +337,37 @@ export class Main extends GameObject {
     return collected;
   }
 
+  /**
+   * Get all objects with a specific drawLayer (cached for performance)
+   * @param {string} layer - The drawLayer to collect (e.g., "LIGHTS", "HUD", "FLOOR")
+   * @returns {Array} Array of GameObjects with the specified drawLayer
+   */
+  getObjectsWithDrawLayer(layer) {
+    // If cache is dirty, clear all cached layers
+    if (this._layerCacheDirty) {
+      this._layerCache.clear();
+      this._layerCacheDirty = false;
+    }
+
+    // Return cached layer if available
+    if (this._layerCache.has(layer)) {
+      return this._layerCache.get(layer);
+    }
+
+    // Collect and cache the layer
+    const objects = this.collectObjectsWithDrawLayer(this, layer);
+    this._layerCache.set(layer, objects);
+    return objects;
+  }
+
   drawForeground(ctx) {
     // Handle TimeOfDayEffect first (render behind HUD)
     const timeOfDayEffect = this.children.find(c => c.constructor.name === 'TimeOfDayEffect');
     if (timeOfDayEffect) {
       // Use lighting system for night and dusk modes
       if (timeOfDayEffect.currentState === 'night' || timeOfDayEffect.currentState === 'dusk') {
-        const lights = this.collectObjectsWithDrawLayer(this, "LIGHTS");
+        // Use cached lights collection for performance
+        const lights = this.getObjectsWithDrawLayer("LIGHTS");
         this.lightingSystem.render(ctx, timeOfDayEffect, lights, this.camera);
       } else {
         // For day, render TimeOfDayEffect normally (or no overlay)

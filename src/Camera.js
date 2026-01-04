@@ -1,14 +1,15 @@
 import { GameObject } from "./GameObject.js";
 import { events } from "./Events.js";
 import { Vector2 } from "./Vector2.js";
+import { DISPLAY, CAMERA, SPRITE } from "./constants.js";
 
 export class Camera extends GameObject {
   constructor() {
     super({});
 
     // Dead zone configuration
-    this.deadZoneWidth = 40;  // How far left/right hero can move before camera follows - change to 0 for instant follow
-    this.deadZoneHeight = 30; // How far up/down hero can move before camera follows - change to 0 for instant follow
+    this.deadZoneWidth = CAMERA.DEAD_ZONE_WIDTH;  // How far left/right hero can move before camera follows - change to 0 for instant follow
+    this.deadZoneHeight = CAMERA.DEAD_ZONE_HEIGHT; // How far up/down hero can move before camera follows - change to 0 for instant follow
 
     this.currentLevel = null;
 
@@ -27,10 +28,10 @@ export class Camera extends GameObject {
   }
 
   clampToMapBounds() {
-    const canvasWidth = 768;
-    const canvasHeight = 432;
-    const mapWidth = 1120;  // Your map width in pixels
-    const mapHeight = 640; // Your map height in pixels
+    const canvasWidth = DISPLAY.CANVAS_WIDTH;
+    const canvasHeight = DISPLAY.CANVAS_HEIGHT;
+    const mapWidth = CAMERA.DEFAULT_MAP_WIDTH;  // Your map width in pixels
+    const mapHeight = CAMERA.DEFAULT_MAP_HEIGHT; // Your map height in pixels
 
     // Only clamp if map is larger than canvas
     if (mapWidth > canvasWidth) {
@@ -47,9 +48,9 @@ export class Camera extends GameObject {
   }
 
   updateCameraWithDeadZone(heroPosition) {
-    const canvasWidth = 768;
-    const canvasHeight = 432;
-    const personHalf = 8;
+    const canvasWidth = DISPLAY.CANVAS_WIDTH;
+    const canvasHeight = DISPLAY.CANVAS_HEIGHT;
+    const personHalf = SPRITE.HERO_HALF_SIZE;
 
     // Calculate where hero appears on screen with current camera position
     const heroScreenX = heroPosition.x + this.position.x + personHalf;
@@ -82,9 +83,9 @@ export class Camera extends GameObject {
 
   centerPositionOnTarget(pos) {
     // Create a new position based on the incoming position
-    const personHalf = 8;
-    const canvasWidth = 768;
-    const canvasHeight = 432;
+    const personHalf = SPRITE.HERO_HALF_SIZE;
+    const canvasWidth = DISPLAY.CANVAS_WIDTH;
+    const canvasHeight = DISPLAY.CANVAS_HEIGHT;
     const halfWidth = -personHalf + canvasWidth / 2;
     const halfHeight = -personHalf + canvasHeight / 2;
     this.position = new Vector2(

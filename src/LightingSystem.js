@@ -1,3 +1,5 @@
+import { DISPLAY, LIGHTING } from './constants.js';
+
 /**
  * Handles rendering of the night overlay with pixelated light sources.
  * Punches holes in the darkness overlay where lights are positioned.
@@ -5,8 +7,8 @@
 export class LightingSystem {
   constructor() {
     this.overlayCanvas = document.createElement('canvas');
-    this.overlayCanvas.width = 768;
-    this.overlayCanvas.height = 432;
+    this.overlayCanvas.width = DISPLAY.CANVAS_WIDTH;
+    this.overlayCanvas.height = DISPLAY.CANVAS_HEIGHT;
     this.lightCanvas = document.createElement('canvas');
   }
 
@@ -21,7 +23,7 @@ export class LightingSystem {
     if (!timeOfDayEffect) return;
 
     const overlayCtx = this.overlayCanvas.getContext('2d');
-    overlayCtx.clearRect(0, 0, 768, 432);
+    overlayCtx.clearRect(0, 0, DISPLAY.CANVAS_WIDTH, DISPLAY.CANVAS_HEIGHT);
 
     // Draw dark overlay to offscreen canvas
     timeOfDayEffect.draw(overlayCtx, 0, 0);
@@ -50,7 +52,7 @@ export class LightingSystem {
     }
 
     // Create small canvas for pixelated effect
-    const pixelSize = 8;
+    const pixelSize = LIGHTING.PIXEL_SIZE;
     const lightSizeInPixels = Math.ceil(light.radius * 2 / pixelSize);
     this.lightCanvas.width = lightSizeInPixels;
     this.lightCanvas.height = lightSizeInPixels;
@@ -68,8 +70,8 @@ export class LightingSystem {
 
     // Larger inner radius with full intensity
     gradient.addColorStop(0, `rgba(0, 0, 0, ${light.intensity})`);
-    gradient.addColorStop(0.4, `rgba(0, 0, 0, ${light.intensity})`);
-    gradient.addColorStop(0.7, `rgba(0, 0, 0, ${light.intensity * 0.5})`);
+    gradient.addColorStop(LIGHTING.GRADIENT_STOP_1, `rgba(0, 0, 0, ${light.intensity})`);
+    gradient.addColorStop(LIGHTING.GRADIENT_STOP_2, `rgba(0, 0, 0, ${light.intensity * LIGHTING.GRADIENT_FALLOFF})`);
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     lightCtx.fillStyle = gradient;

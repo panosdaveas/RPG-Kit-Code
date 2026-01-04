@@ -1,0 +1,287 @@
+================================================================================
+RPG-KIT CONSTANTS REFERENCE
+================================================================================
+This file documents all hardcoded magic numbers found throughout the codebase.
+These should be considered for extraction into a constants.js module for:
+- Easier maintenance
+- Single source of truth
+- Better code readability
+- Simplified updates
+
+Last updated: 2026-01-04
+
+================================================================================
+CANVAS & DISPLAY
+================================================================================
+
+CANVAS_WIDTH = 768
+  Location: main.js:15, Camera.js:30,50,86, LightingSystem.js:8,24,
+            TimeOfDayEffect.js:11, ScreenRainEffect.js:14, TileSprite.js:97
+  Usage: Internal canvas resolution width (logical pixels)
+
+CANVAS_HEIGHT = 432
+  Location: main.js:16, Camera.js:31,51,87, LightingSystem.js:9,24,
+            TimeOfDayEffect.js:12, ScreenRainEffect.js:15, TileSprite.js:98
+  Usage: Internal canvas resolution height (logical pixels)
+
+DEVICE_PIXEL_RATIO = window.devicePixelRatio || 1
+  Location: main.js:12
+  Usage: High-DPI display scaling factor
+  Note: Canvas is scaled by this factor for sharp rendering on retina displays
+
+================================================================================
+GAME LOOP & TIMING
+================================================================================
+
+TARGET_FPS = 60
+  Derived: 1000/60 = 16.666... ms per frame
+  Location: GameLoop.js:6
+  Usage: Fixed timestep for game logic updates
+  Formula: this.timeStep = 1000/60
+
+MILLISECONDS_PER_SECOND = 1000
+  Location: GameLoop.js:6 (implicit in 1000/60)
+  Usage: Conversion factor for delta time calculations
+
+================================================================================
+RENDERING & CULLING
+================================================================================
+
+SPRITE_CULLING_PADDING = 32
+  Location: Sprite.js:59, TileSprite.js:57,99
+  Usage: Extra pixels beyond viewport for sprite visibility checks
+  Purpose: Prevents pop-in for sprites near screen edges
+
+TILE_CULLING_PADDING = 16
+  Location: TileLayerRenderer.js:104
+  Usage: Extra pixels beyond viewport for tile visibility checks
+  Purpose: Prevents pop-in for tiles near screen edges
+  Note: Smaller than sprite padding (tiles are smaller/more numerous)
+
+================================================================================
+CAMERA SYSTEM
+================================================================================
+
+CAMERA_DEAD_ZONE_WIDTH = 40
+  Location: Camera.js:10
+  Usage: Horizontal dead zone (pixels hero can move before camera follows)
+  Note: Set to 0 for instant camera follow
+
+CAMERA_DEAD_ZONE_HEIGHT = 30
+  Location: Camera.js:11
+  Usage: Vertical dead zone (pixels hero can move before camera follows)
+  Note: Set to 0 for instant camera follow
+
+MAP_WIDTH_PIXELS = 1120
+  Location: Camera.js:32
+  Usage: Default map width for camera bounds clamping
+  Note: Should be dynamic per level, not hardcoded
+
+MAP_HEIGHT_PIXELS = 640
+  Location: Camera.js:33
+  Usage: Default map height for camera bounds clamping
+  Note: Should be dynamic per level, not hardcoded
+
+HERO_HALF_SIZE = 8
+  Location: Camera.js:52,85
+  Usage: Half of hero sprite size for camera centering calculations
+  Note: Assumes 16x16 hero sprite
+
+================================================================================
+SPRITE & ANIMATION
+================================================================================
+
+DEFAULT_FRAME_SIZE = 16
+  Location: Sprite.js:19 (Vector2(16, 16))
+  Usage: Default sprite frame dimensions (pixels)
+
+DEFAULT_SPRITE_SCALE = 1
+  Location: Sprite.js:24
+  Usage: Default sprite scale multiplier
+
+DEFAULT_HORIZONTAL_FRAMES = 1
+  Location: Sprite.js:20
+  Usage: Default number of frames in sprite sheet horizontally
+
+DEFAULT_VERTICAL_FRAMES = 1
+  Location: Sprite.js:21
+  Usage: Default number of frames in sprite sheet vertically
+
+DEFAULT_FRAME_INDEX = 0
+  Location: Sprite.js:22
+  Usage: Starting frame for sprite animations
+
+RAIN_SPRITE_WIDTH = 256
+  Location: ScreenRainEffect.js:16
+  Usage: Rain effect sprite sheet width
+
+RAIN_SPRITE_HEIGHT = 240
+  Location: ScreenRainEffect.js:17
+  Usage: Rain effect sprite sheet height
+
+RAIN_FRAME_DURATION = 100
+  Location: ScreenRainEffect.js:27
+  Usage: Milliseconds per rain animation frame
+  Note: 100ms = 10 FPS for rain animation
+
+RAIN_ALPHA = 0.3
+  Location: ScreenRainEffect.js:65
+  Usage: Transparency level for rain overlay (30% opaque)
+
+RAIN_FRAME_COUNT = 4
+  Location: ScreenRainEffect.js:20-25 (implicit)
+  Usage: Number of frames in rain animation cycle
+
+================================================================================
+LIGHTING SYSTEM
+================================================================================
+
+LIGHT_PIXEL_SIZE = 8
+  Location: LightingSystem.js:53
+  Usage: Pixel size for light gradient downscaling (pixelated effect)
+  Purpose: Creates retro-style chunky lighting
+
+HIGHLIGHT_LIGHT_RADIUS = 4
+  Location: TileSprite.js:41
+  Usage: Default radius multiplier for highlighted NPCs/objects
+  Note: This is multiplied by tile size (4 * 16 = 64px)
+
+HIGHLIGHT_LIGHT_INTENSITY = 0.8
+  Location: TileSprite.js:41
+  Usage: Default intensity for highlighted objects (80% brightness)
+
+LIGHT_POSITION_OFFSET_X = 8
+  Location: TileSprite.js:42
+  Usage: Horizontal offset for light position on tiles
+
+LIGHT_POSITION_OFFSET_Y = 2
+  Location: TileSprite.js:42
+  Usage: Vertical offset for light position on tiles (above feet)
+
+GRADIENT_COLOR_STOP_1 = 0.4
+  Location: LightingSystem.js:71
+  Usage: First gradient transition point (40% of radius)
+
+GRADIENT_COLOR_STOP_2 = 0.7
+  Location: LightingSystem.js:72
+  Usage: Second gradient transition point (70% of radius)
+
+GRADIENT_FALLOFF_MULTIPLIER = 0.5
+  Location: LightingSystem.js:72
+  Usage: Intensity reduction at second color stop (50% of max)
+
+================================================================================
+TIME OF DAY EFFECTS
+================================================================================
+
+DUSK_OVERLAY_OPACITY = 0.35
+  Location: TimeOfDayEffect.js:18
+  Usage: Opacity for dusk orange/pink overlay (35%)
+
+DUSK_OVERLAY_COLOR_R = 116
+DUSK_OVERLAY_COLOR_G = 30
+DUSK_OVERLAY_COLOR_B = 4
+  Location: TimeOfDayEffect.js:18
+  Usage: RGB values for warm dusk lighting (orange/pink tint)
+
+NIGHT_OVERLAY_OPACITY = 0.55
+  Location: TimeOfDayEffect.js:23
+  Usage: Opacity for night dark blue overlay (55%)
+
+NIGHT_OVERLAY_COLOR_R = 9
+NIGHT_OVERLAY_COLOR_G = 9
+NIGHT_OVERLAY_COLOR_B = 43
+  Location: TimeOfDayEffect.js:23
+  Usage: RGB values for night lighting (dark blue tint)
+  Note: Changed from (20, 20, 60) to (9, 9, 43) for darker effect
+
+TIME_OF_DAY_BLEND_MODE = "multiply"
+  Location: TimeOfDayEffect.js:19,24
+  Usage: Canvas composite operation for lighting overlays
+
+================================================================================
+TILE SYSTEM
+================================================================================
+
+TILE_WIDTH = 16
+  Location: Throughout TiledMap.js, TileLayerRenderer.js
+  Usage: Standard tile width in pixels (from Tiled map data)
+  Note: Loaded from tilemap, but 16x16 is standard
+
+TILE_HEIGHT = 16
+  Location: Throughout TiledMap.js, TileLayerRenderer.js
+  Usage: Standard tile height in pixels (from Tiled map data)
+  Note: Loaded from tilemap, but 16x16 is standard
+
+================================================================================
+PERFORMANCE THRESHOLDS
+================================================================================
+
+Note: These are implicit thresholds that could become configurable constants
+
+MAX_EXPECTED_CHILDREN_PER_OBJECT = ~100
+  Location: Implicit in GameObject Y-sorting performance
+  Impact: getDrawChildrenOrdered() called 50-100 times per frame
+  Recommendation: Consider spatial partitioning above this threshold
+
+ASSUMED_AVERAGE_LIGHTS_PER_SCENE = ~5-10
+  Location: Implicit in LightingSystem.js
+  Impact: Each light creates an off-screen canvas
+  Recommendation: Pool canvases if light count exceeds 10
+
+================================================================================
+DEPRECATED / COMMENTED VALUES
+================================================================================
+
+OLD_NIGHT_OVERLAY_COLOR = rgba(20, 20, 60, 0.55)
+  Location: TimeOfDayEffect.js:22 (commented out)
+  Replaced with: rgba(9, 9, 43, 0.55)
+  Reason: Darker night effect desired
+
+================================================================================
+RECOMMENDATIONS FOR CONSTANTS.JS MIGRATION
+================================================================================
+
+Priority 1 (High Impact):
+- Canvas dimensions (768x432) - duplicated 15+ times
+- Culling padding values (16, 32) - duplicated 10+ times
+- Camera dead zones (40, 30) - important for game feel
+
+Priority 2 (Medium Impact):
+- Time of day colors and opacities
+- Lighting system values (pixel size, gradients)
+- Rain effect parameters
+
+Priority 3 (Lower Impact):
+- Default sprite values
+- Hero size assumptions
+- Map dimensions (should be level-specific anyway)
+
+Example constants.js structure:
+
+export const DISPLAY = {
+  CANVAS_WIDTH: 768,
+  CANVAS_HEIGHT: 432,
+  DPR: window.devicePixelRatio || 1
+};
+
+export const GAME_LOOP = {
+  TARGET_FPS: 60,
+  TIME_STEP: 1000/60
+};
+
+export const CULLING = {
+  SPRITE_PADDING: 32,
+  TILE_PADDING: 16
+};
+
+export const CAMERA = {
+  DEAD_ZONE_WIDTH: 40,
+  DEAD_ZONE_HEIGHT: 30
+};
+
+// etc...
+
+================================================================================
+END OF CONSTANTS REFERENCE
+================================================================================

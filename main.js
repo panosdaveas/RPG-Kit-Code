@@ -3,6 +3,7 @@ import {Vector2} from "./src/Vector2.js";
 import {GameLoop} from "./src/GameLoop.js";
 import {Main} from "./src/objects/Main/Main.js";
 import { MainMapLevel } from './src/levels/MainMapLevel.js';
+import { DISPLAY } from './src/constants.js';
 
 // Grabbing the canvas to draw to
 const canvas = document.querySelector("#game-canvas");
@@ -12,8 +13,8 @@ const ctx = canvas.getContext("2d");
 const dpr = window.devicePixelRatio || 1;
 
 // Set internal canvas resolution to match device pixels
-canvas.width = 768 * dpr;
-canvas.height = 432 * dpr;
+canvas.width = DISPLAY.CANVAS_WIDTH * dpr;
+canvas.height = DISPLAY.CANVAS_HEIGHT * dpr;
 
 // Scale the drawing context to compensate
 ctx.scale(dpr, dpr);

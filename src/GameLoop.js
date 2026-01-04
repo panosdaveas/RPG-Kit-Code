@@ -1,9 +1,11 @@
+import { GAME_LOOP } from './constants.js';
+
 export class GameLoop {
   constructor(update, render) {
 
     this.lastFrameTime = 0;
     this.accumulatedTime = 0;
-    this.timeStep = 1000/60; // 60 frames per second
+    this.timeStep = GAME_LOOP.TIME_STEP; // 60 frames per second
 
     this.update = update;
     this.render = render;

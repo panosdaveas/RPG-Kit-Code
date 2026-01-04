@@ -1,5 +1,6 @@
 import { Vector2 } from "./Vector2.js";
 import { GameObject } from "./GameObject.js";
+import { SPRITE, CULLING } from "./constants.js";
 
 export class Sprite extends GameObject {
   constructor({
@@ -16,12 +17,12 @@ export class Sprite extends GameObject {
       name
     });
     this.resource = resource;
-    this.frameSize = frameSize ?? new Vector2(16, 16);
-    this.hFrames = hFrames ?? 1;
-    this.vFrames = vFrames ?? 1;
-    this.frame = frame ?? 0;
+    this.frameSize = frameSize ?? new Vector2(SPRITE.DEFAULT_FRAME_SIZE, SPRITE.DEFAULT_FRAME_SIZE);
+    this.hFrames = hFrames ?? SPRITE.DEFAULT_HORIZONTAL_FRAMES;
+    this.vFrames = vFrames ?? SPRITE.DEFAULT_VERTICAL_FRAMES;
+    this.frame = frame ?? SPRITE.DEFAULT_FRAME_INDEX;
     this.frameMap = new Map();
-    this.scale = scale ?? 1;
+    this.scale = scale ?? SPRITE.DEFAULT_SCALE;
     this.position = position ?? new Vector2(0, 0);
     this.animations = animations ?? null;
     this.buildFrameMap();
@@ -56,7 +57,7 @@ export class Sprite extends GameObject {
     // Off-screen culling: skip rendering if sprite is outside viewport
     const spriteWidth = this.frameSize.x * this.scale;
     const spriteHeight = this.frameSize.y * this.scale;
-    const padding = 32; // Buffer to account for sprites partially visible
+    const padding = CULLING.SPRITE_PADDING; // Buffer to account for sprites partially visible
 
     // Check if sprite is completely off-screen
     if (x + spriteWidth < -padding ||

@@ -1,4 +1,5 @@
 import { GameObject } from "../../GameObject.js";
+import { DISPLAY, TIME_OF_DAY } from "../../constants.js";
 
 /**
  * Manages time-of-day lighting effects using screen overlays.
@@ -8,20 +9,19 @@ export class TimeOfDayEffect extends GameObject {
     super({});
     this.drawLayer = "HUD"; // Render on HUD layer (screen-fixed)
 
-    this.canvasWidth = 768;
-    this.canvasHeight = 432;
+    this.canvasWidth = DISPLAY.CANVAS_WIDTH;
+    this.canvasHeight = DISPLAY.CANVAS_HEIGHT;
 
     // Time of day states with overlay colors
     this.states = {
       day: null, // No overlay during day
       dusk: {
-        color: 'rgba(116, 30, 4, 0.35)', // Warm orange/pink
-        blendMode: 'multiply'
+        color: TIME_OF_DAY.DUSK.COLOR, // Warm orange/pink
+        blendMode: TIME_OF_DAY.BLEND_MODE
       },
       night: {
-        // color: 'rgba(20, 20, 60, 0.55)', // Dark blue
-        color: 'rgba(9, 9, 43, 0.55)', // Dark blue
-        blendMode: 'multiply'
+        color: TIME_OF_DAY.NIGHT.COLOR, // Dark blue
+        blendMode: TIME_OF_DAY.BLEND_MODE
       }
     };
 

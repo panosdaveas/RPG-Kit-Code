@@ -9,10 +9,17 @@ export class GameObject {
     this.hasReadyBeenCalled = false;
     this.isSolid = false;
     this.drawLayer = null;
+
+    // Performance optimization: cache sorted children array
+    this._sortedChildrenCache = null;
+    this._sortedChildrenDirty = true;
   }
 
   // First entry point of the loop
   stepEntry(delta, root) {
+    // Invalidate sorted children cache since positions may change during step
+    this._sortedChildrenDirty = true;
+
     // Call updates on all children first
     this.children.forEach((child) => child.stepEntry(delta, root));
 
@@ -55,7 +62,13 @@ export class GameObject {
   }
 
   getDrawChildrenOrdered() {
-    return [...this.children].sort((a,b) => {
+    // Return cached sorted children if available and not dirty
+    if (this._sortedChildrenCache && !this._sortedChildrenDirty) {
+      return this._sortedChildrenCache;
+    }
+
+    // Rebuild the cache
+    this._sortedChildrenCache = [...this.children].sort((a,b) => {
 
       if (b.drawLayer === "FLOOR") {
         return 1;
@@ -66,7 +79,10 @@ export class GameObject {
       const bSortY = b.position.y + (b.sortingOffsetY ?? 0);
 
       return aSortY > bSortY ? 1 : -1
-    })
+    });
+
+    this._sortedChildrenDirty = false;
+    return this._sortedChildrenCache;
   }
 
   drawImage(ctx, drawPosX, drawPosY) {
@@ -85,6 +101,8 @@ export class GameObject {
   addChild(gameObject) {
     gameObject.parent = this;
     this.children.push(gameObject);
+    // Invalidate sorted children cache when children are added
+    this._sortedChildrenDirty = true;
   }
 
   removeChild(gameObject) {
@@ -92,5 +110,7 @@ export class GameObject {
     this.children = this.children.filter(g => {
       return gameObject !== g;
     })
+    // Invalidate sorted children cache when children are removed
+    this._sortedChildrenDirty = true;
   }
 }

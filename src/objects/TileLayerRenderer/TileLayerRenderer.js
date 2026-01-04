@@ -1,4 +1,5 @@
 import { GameObject } from "../../GameObject.js";
+import { CULLING } from "../../constants.js";
 
 export class TileLayerRenderer extends GameObject {
     constructor(tiledMap) {
@@ -101,7 +102,7 @@ export class TileLayerRenderer extends GameObject {
         const tileDrawY = y + offsetY;
         const tileWidth = this.tiledMap.tileWidth;
         const tileHeight = this.tiledMap.tileHeight;
-        const padding = 16; // Buffer for tile edges
+        const padding = CULLING.TILE_PADDING; // Buffer for tile edges
 
         // Off-screen culling: skip tiles outside viewport
         if (tileDrawX + tileWidth < -padding ||

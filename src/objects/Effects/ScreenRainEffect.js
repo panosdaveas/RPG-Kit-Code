@@ -1,5 +1,6 @@
 import { GameObject } from "../../GameObject.js";
 import { resources } from "../../Resource.js";
+import { DISPLAY, RAIN } from "../../constants.js";
 
 /**
  * Screen-fixed rain effect that doesn't move with the camera.
@@ -11,10 +12,10 @@ export class ScreenRainEffect extends GameObject {
     super({});
     this.drawLayer = "HUD"; // Render on HUD layer (screen-fixed)
 
-    this.canvasWidth = 768;
-    this.canvasHeight = 432;
-    this.spriteWidth = 256;
-    this.spriteHeight = 240;
+    this.canvasWidth = DISPLAY.CANVAS_WIDTH;
+    this.canvasHeight = DISPLAY.CANVAS_HEIGHT;
+    this.spriteWidth = RAIN.SPRITE_WIDTH;
+    this.spriteHeight = RAIN.SPRITE_HEIGHT;
 
     // Animation
     this.frames = [
@@ -24,7 +25,7 @@ export class ScreenRainEffect extends GameObject {
       resources.images.rain4
     ];
     this.currentFrameIndex = 0;
-    this.frameDuration = 100; // milliseconds per frame
+    this.frameDuration = RAIN.FRAME_DURATION; // milliseconds per frame
     this.timeInFrame = 0;
 
     this.isEnabled = false; // Start disabled
@@ -62,7 +63,7 @@ export class ScreenRainEffect extends GameObject {
     const tilesY = Math.ceil(this.canvasHeight / this.spriteHeight) + 1;
 
     ctx.save();
-    ctx.globalAlpha = 0.3; // Make rain semi-transparent
+    ctx.globalAlpha = RAIN.ALPHA; // Make rain semi-transparent
 
     // Tile the sprite across the screen
     for (let y = 0; y < tilesY; y++) {

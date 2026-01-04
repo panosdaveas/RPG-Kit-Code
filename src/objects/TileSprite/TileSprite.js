@@ -1,6 +1,7 @@
 import { GameObject } from "../../GameObject.js";
 import { Vector2 } from "../../Vector2.js";
 import { Light } from "../Light/Light.js";
+import { DISPLAY, CULLING, LIGHTING } from "../../constants.js";
 
 /**
  * Lightweight sprite for depth-sorted tiles from Tiled object layers.
@@ -38,8 +39,8 @@ export class TileSprite extends GameObject {
 
     // this.addChild(this.sprite);
     if (this.properties.highlight) {
-      const light = new Light(4, 0.8); // 60px radius, 80% intensity
-      light.position = new Vector2(8, 2); // Slightly above NPC's feet
+      const light = new Light(LIGHTING.HIGHLIGHT_RADIUS, LIGHTING.HIGHLIGHT_INTENSITY); // 60px radius, 80% intensity
+      light.position = new Vector2(LIGHTING.LIGHT_OFFSET_X, LIGHTING.LIGHT_OFFSET_Y); // Slightly above NPC's feet
       this.addChild(light);
     }
   }
@@ -54,7 +55,7 @@ export class TileSprite extends GameObject {
   }
 
   drawImage(ctx, drawPosX, drawPosY) {
-    const padding = 32;
+    const padding = CULLING.SPRITE_PADDING;
 
     // Apply sprite offset (draw tile above the position)
     const adjustedDrawPosY = drawPosY + this.spriteOffsetY;
@@ -94,9 +95,9 @@ export class TileSprite extends GameObject {
     // Get camera position from root (Main object)
     const camera = root?.camera;
     if (camera) {
-      const canvasWidth = 768;
-      const canvasHeight = 432;
-      const padding = 32;
+      const canvasWidth = DISPLAY.CANVAS_WIDTH;
+      const canvasHeight = DISPLAY.CANVAS_HEIGHT;
+      const padding = CULLING.SPRITE_PADDING;
 
       const worldX = -camera.position.x;
       const worldY = -camera.position.y;
