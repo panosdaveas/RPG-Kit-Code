@@ -28,17 +28,17 @@ export class Npc extends GameObject {
 
     // Body sprite
     const body = new Sprite({
-      resource: resources.images.npcOldMan,
+      resource: resources.images.npcs,
       frameSize: new Vector2(32, 32),
-      hFrames: 3,
-      vFrames: 8,
-      frame:1,
+      hFrames: 4,
+      vFrames: 1,
+      frame: Math.floor(Math.random() * 4 + 1),
       position: new Vector2(-8, -20),
     })
     this.addChild(body);
 
     // Add light source for night mode
-    const light = new Light(6, 0.8); // 60px radius, 80% intensity
+    const light = new Light(4, 0.7); // 60px radius, 80% intensity
     light.position = new Vector2(8, 2); // Slightly above NPC's feet
     this.addChild(light);
   }
