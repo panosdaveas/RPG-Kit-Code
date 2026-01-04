@@ -90,7 +90,7 @@ export class BlueRoom extends Level {
         events.on("HERO_EXITS", this, () => {
             // Handle level transitions
             events.emit("CHANGE_LEVEL", new MainMapLevel({
-                heroPosition: new Vector2(gridCells(11), gridCells(28))
+                heroPosition: new Vector2(gridCells(25), gridCells(23))
             }))
         });
     }
