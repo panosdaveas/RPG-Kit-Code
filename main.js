@@ -37,6 +37,8 @@ const update = (delta) => {
 };
 
 const draw = () => {
+  // Reset draw counter
+  window.drawnCount = 0;
 
   // Clear anything stale
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -48,6 +50,10 @@ const draw = () => {
   // Draw anything above the game world
   mainScene.drawForeground(ctx);
 
+  // Log draw count (every ~60 frames to avoid spam)
+  if (Math.random() < 0.016) {
+    console.log('Objects drawn this frame:', window.drawnCount);
+  }
 }
 
 // Start the game!

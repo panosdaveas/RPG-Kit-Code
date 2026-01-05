@@ -10,6 +10,11 @@ export class TileLayerRenderer extends GameObject {
         this.isParsed = false;
         this.animationTime = 0; // Track time for animations
         this.tileAnimationStates = new Map(); // tileId -> current frame info
+
+        // Performance optimization: pre-rendered static layers
+        // this.staticLayersCanvas = null;
+        // this.animatedLayers = [];
+        // this.staticLayers = [];
     }
 
     step(delta, root) {
@@ -123,6 +128,9 @@ export class TileLayerRenderer extends GameObject {
         // Calculate source position in tileset
         const srcX = (tileId % this.tilesPerRow) * tileWidth;
         const srcY = Math.floor(tileId / this.tilesPerRow) * tileHeight;
+
+        // Debug: count actual draws
+        window.drawnCount = (window.drawnCount || 0) + 1;
 
         // Draw the tile
         ctx.drawImage(

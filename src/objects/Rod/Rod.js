@@ -11,11 +11,11 @@ export class Rod extends GameObject {
       name: "Rod",
       position: new Vector2(x,y)
     });
-    const sprite = new Sprite({
+    this.sprite = new Sprite({
       resource: resources.images.rod,
       position: new Vector2(0, -5) // nudge upwards visually
     })
-    this.addChild(sprite);
+    this.addChild(this.sprite);
     const light = new Light(3, 1); // 60px radius, 80% intensity
     light.position = new Vector2(8, 0); // Slightly above NPC's feet
     this.addChild(light);

@@ -73,6 +73,9 @@ export class TileSprite extends GameObject {
       return;
     }
 
+    // Debug: count actual draws
+    window.drawnCount = (window.drawnCount || 0) + 1;
+
     // Draw the tile
     ctx.drawImage(
       this.tilesetImage,

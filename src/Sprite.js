@@ -79,6 +79,9 @@ export class Sprite extends GameObject {
     const frameSizeX = this.frameSize.x;
     const frameSizeY = this.frameSize.y;
 
+    // Debug: count actual draws
+    window.drawnCount = (window.drawnCount || 0) + 1;
+
     ctx.drawImage(
       this.resource.image,
       frameCoordX,
