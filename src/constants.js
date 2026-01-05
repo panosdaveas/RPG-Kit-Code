@@ -8,8 +8,8 @@
 // ============================================================================
 
 export const DISPLAY = {
-  CANVAS_WIDTH: 768,
-  CANVAS_HEIGHT: 432,
+  CANVAS_WIDTH: 836,
+  CANVAS_HEIGHT: 470,
   // Device pixel ratio is dynamic, accessed via window.devicePixelRatio
 };
 

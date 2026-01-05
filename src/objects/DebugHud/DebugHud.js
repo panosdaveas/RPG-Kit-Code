@@ -1,6 +1,7 @@
 // src/objects/DebugHud/DebugHud.js
 import { GameObject } from "../../GameObject.js";
 import { Vector2 } from "../../Vector2.js";
+import { DISPLAY } from "../../Constants.js";
 
 export class DebugHud extends GameObject {
     constructor() {
@@ -14,7 +15,7 @@ export class DebugHud extends GameObject {
         this.fps = 60;
         this.frameCount = 0;
         this.elapsedTime = 0;
-        this.updateInterval = 250; // Update display every 250ms
+        this.updateInterval = 1000; // Update display every 250ms
 
         // Cached data
         this.playerId = "Connecting...";
@@ -60,7 +61,7 @@ export class DebugHud extends GameObject {
     drawImage(ctx, drawPosX, drawPosY) {
         const padding = 6;
         const lineHeight = 10;
-        const rightEdge = 768; // Canvas width
+        const rightEdge = DISPLAY.CANVAS_WIDTH; // Canvas width
         const boxWidth = 140;
         const x = rightEdge - boxWidth - padding;
         const y = padding;
