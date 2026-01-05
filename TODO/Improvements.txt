@@ -357,3 +357,10 @@
   4. Add max update limit to game loop (15 minutes)
 
   Total time to production-harden: ~4-5 hours
+
+   2. No Spatial Partitioning
+
+  Location: Hero.js:271-273 (collision checks iterate all children - maybe check only a square area around the player)
+
+  Impact: Low now, High with 100+ objects
+  Future: Consider quadtree/grid when scaling up

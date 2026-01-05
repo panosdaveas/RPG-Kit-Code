@@ -35,11 +35,9 @@ export class Main extends GameObject {
     this._layerCacheDirty = true;
   }
 
-  // Override stepEntry to invalidate layer cache each frame
-  stepEntry(delta, root) {
-    // Invalidate layer cache since children deep in tree may add/remove objects
+  // Method to invalidate layer cache (called when scene graph changes)
+  invalidateLayerCache() {
     this._layerCacheDirty = true;
-    super.stepEntry(delta, root);
   }
 
   ready() {

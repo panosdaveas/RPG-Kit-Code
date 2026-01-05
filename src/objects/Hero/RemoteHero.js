@@ -24,6 +24,7 @@ export class RemoteHero extends GameObject {
         });
 
         this.isSolid = true;
+        this.sortingOffsetY = 1; // Match local Hero's sorting offset for consistent Y-sorting
         this.attributes = new HeroAttributes();
         this.playerId = playerId;
         this.currentLevelId = null;
@@ -65,8 +66,14 @@ export class RemoteHero extends GameObject {
     // Update from network data
     updateFromNetwork(data) {
         // Update position
+        const oldY = this.position.y;
         this.position.x = data.x;
         this.position.y = data.y;
+
+        // Invalidate parent sorting if Y position changed
+        if (oldY !== this.position.y) {
+            this.invalidateParentSorting();
+        }
 
         // Update animation if provided
         if (data.animation) {

@@ -17,9 +17,6 @@ export class GameObject {
 
   // First entry point of the loop
   stepEntry(delta, root) {
-    // Invalidate sorted children cache since positions may change during step
-    this._sortedChildrenDirty = true;
-
     // Call updates on all children first
     this.children.forEach((child) => child.stepEntry(delta, root));
 
@@ -78,7 +75,10 @@ export class GameObject {
       const aSortY = a.position.y + (a.sortingOffsetY ?? 0);
       const bSortY = b.position.y + (b.sortingOffsetY ?? 0);
 
-      return aSortY > bSortY ? 1 : -1
+      // Proper comparison: return 0 when equal for stable sorting
+      if (aSortY < bSortY) return -1;
+      if (aSortY > bSortY) return 1;
+      return 0;
     });
 
     this._sortedChildrenDirty = false;
@@ -103,6 +103,8 @@ export class GameObject {
     this.children.push(gameObject);
     // Invalidate sorted children cache when children are added
     this._sortedChildrenDirty = true;
+    // Invalidate Main's layer cache when scene graph changes
+    this.invalidateRootLayerCache();
   }
 
   removeChild(gameObject) {
@@ -112,5 +114,26 @@ export class GameObject {
     })
     // Invalidate sorted children cache when children are removed
     this._sortedChildrenDirty = true;
+    // Invalidate Main's layer cache when scene graph changes
+    this.invalidateRootLayerCache();
+  }
+
+  // Call this when an object's Y position changes to invalidate parent's sorting cache
+  invalidateParentSorting() {
+    if (this.parent) {
+      this.parent._sortedChildrenDirty = true;
+    }
+  }
+
+  // Walk up the tree to find and invalidate Main's layer cache
+  invalidateRootLayerCache() {
+    let current = this;
+    while (current) {
+      if (current.invalidateLayerCache) {
+        current.invalidateLayerCache();
+        return;
+      }
+      current = current.parent;
+    }
   }
 }
