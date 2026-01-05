@@ -80,6 +80,7 @@ export const RAIN = {
 
 export const LIGHTING = {
   PIXEL_SIZE: 8,  // Pixel size for gradient downscaling (pixelated effect)
+  HIGHLIGHT_PIXEL_SIZE: 1,  // Pixel size for gradient downscaling (pixelated effect)
 
   // Default highlight values
   HIGHLIGHT_RADIUS: 4,        // Radius multiplier (4 * 16 = 64px)

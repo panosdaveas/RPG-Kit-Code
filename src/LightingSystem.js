@@ -52,7 +52,10 @@ export class LightingSystem {
     }
 
     // Create small canvas for pixelated effect
-    const pixelSize = LIGHTING.PIXEL_SIZE;
+    let pixelSize = LIGHTING.PIXEL_SIZE;
+    if (light.constructor.name === 'Highlight') {
+      pixelSize = LIGHTING.HIGHLIGHT_PIXEL_SIZE;
+    }
     const lightSizeInPixels = Math.ceil(light.radius * 2 / pixelSize);
     this.lightCanvas.width = lightSizeInPixels;
     this.lightCanvas.height = lightSizeInPixels;

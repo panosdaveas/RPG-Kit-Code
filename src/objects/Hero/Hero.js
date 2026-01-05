@@ -105,7 +105,7 @@ export class Hero extends GameObject {
         this.attributes.set(attr.name, attr.value);
       }
       this.broadcastAttributes();
-      console.log(this.attributes.getAll());
+      // console.log(this.attributes.getAll());
       // console.log(`${attr.name} increased by ${attr.value}! New ${attr.name}: ${currentAttr + attr.value}`);
     })
   }
