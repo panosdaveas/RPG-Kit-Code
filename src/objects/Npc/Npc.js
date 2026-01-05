@@ -3,7 +3,7 @@ import {Vector2} from "../../Vector2.js";
 import {resources} from "../../Resource.js";
 import {Sprite} from "../../Sprite.js";
 import {storyFlags} from "../../StoryFlags.js";
-import {Light} from "../Light/Light.js";
+import {Highlight} from "../Light/Highlight.js";
 
 export class Npc extends GameObject {
   constructor(x, y, textConfig={}) {
@@ -38,8 +38,12 @@ export class Npc extends GameObject {
     this.addChild(body);
 
     // Add light source for night mode
-    const light = new Light(4, 0.7); // 60px radius, 80% intensity
-    light.position = new Vector2(8, 2); // Slightly above NPC's feet
+    // const light = new Light(4, 0.7); // 60px radius, 80% intensity
+    // light.position = new Vector2(8, 2); // Slightly above NPC's feet
+    // this.addChild(light);
+
+    const light = new Highlight(6, 0.8); // 60px radius, 80% intensity
+    light.position = new Vector2(8, -2); // Slightly above NPC's feet
     this.addChild(light);
   }
 
