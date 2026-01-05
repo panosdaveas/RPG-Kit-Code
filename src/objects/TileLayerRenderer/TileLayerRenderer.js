@@ -1,5 +1,5 @@
 import { GameObject } from "../../GameObject.js";
-import { CULLING } from "../../constants.js";
+import { CULLING } from "../../Constants.js";
 
 export class TileLayerRenderer extends GameObject {
     constructor(tiledMap) {
@@ -12,9 +12,9 @@ export class TileLayerRenderer extends GameObject {
         this.tileAnimationStates = new Map(); // tileId -> current frame info
 
         // Performance optimization: pre-rendered static layers
-        // this.staticLayersCanvas = null;
-        // this.animatedLayers = [];
-        // this.staticLayers = [];
+        this.staticLayersCanvas = null;
+        this.animatedLayers = [];
+        this.staticLayers = [];
     }
 
     step(delta, root) {
@@ -34,6 +34,14 @@ export class TileLayerRenderer extends GameObject {
                     timeInFrame: 0
                 });
             });
+
+            // Separate static and animated layers
+            this.separateStaticAndAnimatedLayers();
+
+            // Pre-render static layers to offscreen canvas
+            if (this.staticLayers.length > 0) {
+                this.prerenderStaticLayers();
+            }
         }
 
         // Update animations
@@ -58,24 +66,105 @@ export class TileLayerRenderer extends GameObject {
         });
     }
 
+    separateStaticAndAnimatedLayers() {
+        this.tiledMap.layers.forEach(layer => {
+            // Check if this layer has any animated tiles
+            const hasAnimatedTiles = layer.tiles.some(tile => {
+                return this.tileAnimationStates.has(tile.tileId);
+            });
+
+            if (hasAnimatedTiles) {
+                this.animatedLayers.push(layer);
+            } else {
+                this.staticLayers.push(layer);
+            }
+        });
+    }
+
+    prerenderStaticLayers() {
+        // Create offscreen canvas for static layers
+        const mapWidth = this.tiledMap.mapWidth * this.tiledMap.tileWidth;
+        const mapHeight = this.tiledMap.mapHeight * this.tiledMap.tileHeight;
+
+        // Validate dimensions
+        if (mapWidth <= 0 || mapHeight <= 0) {
+            console.warn('TileLayerRenderer: Invalid map dimensions', mapWidth, mapHeight);
+            return;
+        }
+
+        this.staticLayersCanvas = document.createElement('canvas');
+        this.staticLayersCanvas.width = mapWidth;
+        this.staticLayersCanvas.height = mapHeight;
+        const ctx = this.staticLayersCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        // Sort static layers by zIndex
+        const sortedStaticLayers = [...this.staticLayers].sort((a, b) => a.zIndex - b.zIndex);
+
+        // Draw all static tiles to the offscreen canvas
+        sortedStaticLayers.forEach(layer => {
+            if (!layer.visible) return;
+
+            ctx.save();
+            ctx.globalAlpha = layer.opacity;
+
+            layer.tiles.forEach(tile => {
+                // Skip tiles with depth property (rendered as TileSprites)
+                const tileProps = this.tiledMap.tileProperties.get(tile.tileId);
+                if (tileProps && tileProps.depth) {
+                    return;
+                }
+
+                // Draw tile directly to offscreen canvas
+                const { tileId, x, y } = tile;
+                const tileWidth = this.tiledMap.tileWidth;
+                const tileHeight = this.tiledMap.tileHeight;
+
+                // Calculate source position in tileset
+                const srcX = (tileId % this.tilesPerRow) * tileWidth;
+                const srcY = Math.floor(tileId / this.tilesPerRow) * tileHeight;
+
+                ctx.drawImage(
+                    this.tilesetImage,
+                    srcX,
+                    srcY,
+                    tileWidth,
+                    tileHeight,
+                    x,
+                    y,
+                    tileWidth,
+                    tileHeight
+                );
+            });
+
+            ctx.restore();
+        });
+    }
+
     drawImage(ctx, drawPosX, drawPosY) {
         if (!this.tiledMap.isLoaded) {
             return;
         }
 
-        // Sort layers by zIndex
-        const sortedLayers = [...this.tiledMap.layers].sort((a, b) => a.zIndex - b.zIndex);
+        // Draw pre-rendered static layers (single draw call)
+        if (this.staticLayersCanvas && this.staticLayersCanvas.width > 0 && this.staticLayersCanvas.height > 0) {
+            window.drawnCount = (window.drawnCount || 0) + 1;
+            ctx.drawImage(
+                this.staticLayersCanvas,
+                drawPosX,
+                drawPosY
+            );
+        }
 
-        // Get promoted tile positions from parent level (if available)
-        const promotedTiles = this.parent?.promotedTilePositions;
+        // Sort animated layers by zIndex
+        const sortedAnimatedLayers = [...this.animatedLayers].sort((a, b) => a.zIndex - b.zIndex);
 
-        // Draw each layer
-        sortedLayers.forEach(layer => {
+        // Draw animated layers with culling
+        sortedAnimatedLayers.forEach(layer => {
             if (!layer.visible) return;
 
             ctx.save();
             ctx.globalAlpha = layer.opacity;
-            // ctx.globalAlpha = 0;
 
             layer.tiles.forEach(tile => {
                 // Skip tiles that have the 'depth' property - they're rendered as TileSprites
