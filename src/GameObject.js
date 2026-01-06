@@ -59,6 +59,7 @@ export class GameObject {
   }
 
   getDrawChildrenOrdered() {
+    // #future #engine #culling #performance
     // OPTIMIZATION TODO: Currently sorting ALL children regardless of viewport visibility.
     // For large levels with hundreds of objects, consider only sorting objects within/near
     // the camera viewport. Culling happens later during render, but we're still sorting

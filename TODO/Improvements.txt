@@ -1,5 +1,23 @@
 🎮 COMPREHENSIVE RPG ENGINE ANALYSIS
 
+# Find all future enhancements
+  grep -r "#future" src/
+
+  # Find multiplayer/networking TODOs
+  grep -r "#multiplayer\|#server\|#client" src/
+
+  # Find performance optimizations
+  grep -r "#performance\|#optimization" src/
+
+  # Find architectural decisions
+  grep -r "#architecture" src/
+
+  # Find priority items
+  grep -r "#priority" src/
+
+  # Combine tags
+  grep -r "#future.*#mmo" src/
+
   Based on my thorough exploration of your codebase, here's my complete breakdown:
 
   ---

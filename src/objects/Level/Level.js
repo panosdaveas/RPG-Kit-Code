@@ -3,6 +3,7 @@ import {TileSprite} from "../TileSprite/TileSprite.js";
 import {Effects} from "../../Effects.js";
 
 /**
+ * #architecture #engine #performance
  * WORLD ARCHITECTURE STRATEGY:
  *
  * Design the world as multiple connected zones (Pokemon-style) rather than one massive map.
@@ -20,6 +21,7 @@ import {Effects} from "../../Effects.js";
  * - Natural loading points at zone boundaries
  * - Easy content authoring (edit one zone at a time)
  *
+ * #future #client #polish
  * FUTURE ENHANCEMENT - Smart Zone Transitions:
  * TODO: Add polished transition effects when changing levels:
  * - Fade out/in effect between zones
