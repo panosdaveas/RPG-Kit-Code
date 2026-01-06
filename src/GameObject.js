@@ -59,6 +59,11 @@ export class GameObject {
   }
 
   getDrawChildrenOrdered() {
+    // OPTIMIZATION TODO: Currently sorting ALL children regardless of viewport visibility.
+    // For large levels with hundreds of objects, consider only sorting objects within/near
+    // the camera viewport. Culling happens later during render, but we're still sorting
+    // off-screen objects unnecessarily.
+
     // Return cached sorted children if available and not dirty
     if (this._sortedChildrenCache && !this._sortedChildrenDirty) {
       return this._sortedChildrenCache;
