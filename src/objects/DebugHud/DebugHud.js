@@ -56,6 +56,12 @@ export class DebugHud extends GameObject {
                 };
             }
         }
+
+        // Log draw count (every ~60 frames to avoid spam)
+        if (Math.random() < 0.016) {
+          this.drawnCount = window.drawnCount;
+        //   console.log('Objects drawn this frame:', window.drawnCount);
+        }
     }
 
     drawImage(ctx, drawPosX, drawPosY) {
@@ -68,7 +74,7 @@ export class DebugHud extends GameObject {
 
         // Draw semi-transparent background
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(x - padding, y - padding, boxWidth + padding * 2, (lineHeight * 5) + padding * 2);
+        ctx.fillRect(x - padding, y - padding, boxWidth + padding * 2, (lineHeight * 6) + padding * 2);
 
         // Set text style
         ctx.textRendering = "geometricPrecision";
@@ -91,6 +97,9 @@ export class DebugHud extends GameObject {
 
         ctx.fillStyle = "#fff";
         ctx.fillText(`Pos: (${this.heroPosition.x}, ${this.heroPosition.y})`, Math.floor(x), Math.floor(currentY));
+        currentY += lineHeight;
+
+        ctx.fillText(`Drawn Objects: ${this.drawnCount}`, Math.floor(x), Math.floor(currentY));
         currentY += lineHeight;
 
         // Color-coded FPS

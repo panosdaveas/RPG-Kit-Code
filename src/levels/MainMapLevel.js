@@ -2,7 +2,6 @@ import { Level } from "../objects/Level/Level.js";
 import { resources } from "../Resource.js";
 import { TiledMap } from "../TiledMap.js";
 import { TileLayerRenderer } from "../objects/TileLayerRenderer/TileLayerRenderer.js";
-import { Hero } from "../objects/Hero/Hero.js";
 import { Exit } from "../objects/Exit/Exit.js";
 import { Rod } from "../objects/Rod/Rod.js";
 import { Chest } from "../objects/Chest/Chest.js";
@@ -84,9 +83,8 @@ export class MainMapLevel extends Level {
         // Use walls from Tiled
         this.walls = this.tiledMap.walls;
 
+        // Set hero start position (hero will be added by Main.setLevel)
         this.heroStartPosition = params.heroPosition || new Vector2(560, 400);
-        const hero = new Hero(this.heroStartPosition.x, this.heroStartPosition.y);
-        this.addChild(hero);
     }
 
     ready() {

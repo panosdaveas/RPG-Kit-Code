@@ -5,7 +5,12 @@ export class HeroAttributes {
 
     // Set a single attribute
     set(name, value) {
-        this.data.set(name, value);
+        if (!this.has(name) || typeof value != 'number') {
+            this.data.set(name, value);
+        } else {
+            const currentAttr = this.get(name);
+            this.data.set(name, currentAttr + value);
+        }
     }
 
     // Get a single attribute

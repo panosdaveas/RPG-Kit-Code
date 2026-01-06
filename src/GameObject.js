@@ -80,7 +80,7 @@ export class GameObject {
       if (aSortY > bSortY) return 1;
       return 0;
     });
-    console.log(this._sortedChildrenCache.length);
+    // console.log(this._sortedChildrenCache.length);
     this._sortedChildrenDirty = false;
     return this._sortedChildrenCache;
   }

@@ -7,6 +7,7 @@ import { SpriteTextString } from "../SpriteTextString/SpriteTextString.js";
 import { storyFlags } from "../../StoryFlags.js";
 import { MultiplayerManager } from "../../client/MultiplayerManager.js";
 import { RemoteHero } from "../Hero/RemoteHero.js";
+import { Hero } from "../Hero/Hero.js";
 import { DebugHud } from "../DebugHud/DebugHud.js";
 import { ChatUI } from "../../client/ChatUI.js";
 import { ScreenRainEffect } from "../Effects/ScreenRainEffect.js";
@@ -24,6 +25,9 @@ export class Main extends GameObject {
     this.camera = new Camera();
     this.lightingSystem = new LightingSystem();
     this.effects = new Effects(); // Store effects across level changes
+
+    // Create the hero once - it will persist across all level changes
+    this.hero = new Hero(0, 0);
 
     // Multiplayer
     this.multiplayerManager = new MultiplayerManager();
@@ -225,8 +229,15 @@ export class Main extends GameObject {
   }
 
   setLevel(newLevelInstance) {
-    // Remove remote players from old level first
+    // Remove hero and remote players from old level
     if (this.level) {
+      // Remove hero from old level
+      if (this.hero.parent === this.level) {
+        this.level.children = this.level.children.filter(c => c !== this.hero);
+        this.hero.parent = null;
+      }
+
+      // Remove remote players from old level
       this.remotePlayers.forEach(remoteHero => {
         if (remoteHero.parent === this.level) {
           this.level.children = this.level.children.filter(c => c !== remoteHero);
@@ -248,17 +259,37 @@ export class Main extends GameObject {
     this.level = newLevelInstance;
     this.addChild(this.level);
 
-    // Center camera on hero's starting position
+    // Position the hero at the new level's start position
     if (newLevelInstance.heroStartPosition) {
+      this.hero.position.x = newLevelInstance.heroStartPosition.x;
+      this.hero.position.y = newLevelInstance.heroStartPosition.y;
+      this.hero.destinationPosition = this.hero.position.duplicate();
       this.camera.centerPositionOnTarget(newLevelInstance.heroStartPosition);
     }
 
-    // Update local hero's current level and broadcast it
-    const hero = this.level.children.find(c => c.constructor.name === 'Hero');
-    if (hero) {
-      hero.currentLevelId = this.level.levelId;
-      hero.broadcastState();
+    // Set hero's facing direction if specified by the level
+    if (newLevelInstance.heroStartFacing) {
+      this.hero.facingDirection = newLevelInstance.heroStartFacing;
+      // Set appropriate standing animation based on direction
+      const directionToAnim = {
+        'DOWN': 'standDown',
+        'UP': 'standUp',
+        'LEFT': 'standLeft',
+        'RIGHT': 'standRight'
+      };
+      const animName = directionToAnim[newLevelInstance.heroStartFacing];
+      if (animName) {
+        this.hero.body.animations.play(animName);
+        this.hero.currentAnimation = animName;
+      }
     }
+
+    // Add the hero to the new level
+    this.level.addChild(this.hero);
+
+    // Update local hero's current level and broadcast it
+    this.hero.currentLevelId = this.level.levelId;
+    this.hero.broadcastState();
 
     // Update visibility for all remote players
     this.remotePlayers.forEach(remoteHero => {

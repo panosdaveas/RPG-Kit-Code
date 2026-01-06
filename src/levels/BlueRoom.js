@@ -2,7 +2,6 @@ import { Level } from "../objects/Level/Level.js";
 import { resources } from "../Resource.js";
 import { TiledMap } from "../TiledMap.js";
 import { TileLayerRenderer } from "../objects/TileLayerRenderer/TileLayerRenderer.js";
-import { Hero } from "../objects/Hero/Hero.js";
 import { Exit } from "../objects/Exit/Exit.js";
 import { Rod } from "../objects/Rod/Rod.js";
 import { Npc } from "../objects/Npc/Npc.js";
@@ -29,7 +28,12 @@ export class BlueRoom extends Level {
         this.setupLevel(params);
 
         const npc1 = new Npc(gridCells(38), gridCells(20), {
-            content: "I am the first NPC!",
+            content: [
+                {
+                    string: "Hi",
+                    requires: [],
+                }
+            ],
             portraitFrame: 1
         })
         this.addChild(npc1);
@@ -50,12 +54,10 @@ export class BlueRoom extends Level {
         const spawns = this.tiledMap.getObjectsByType("spawn");
         const heroSpawn = spawns.find(s => s.name === "hero") || { x: 560, y: 400 };
 
+        // Set hero start position (hero will be added by Main.setLevel)
         this.heroStartPosition = params.heroPosition || new Vector2(heroSpawn.x, heroSpawn.y);
-        const hero = new Hero(this.heroStartPosition.x, this.heroStartPosition.y);
-        this.addChild(hero);
-        hero.facingDirection = UP;
-        hero.body.animations.play("standUp");
-        hero.currentAnimation = 'standUp';
+        // Store facing direction for when hero enters this level
+        this.heroStartFacing = UP;
 
         // Spawn items from object layer
         const items = this.tiledMap.getObjectsByType("item");

@@ -51,9 +51,9 @@ const draw = () => {
   mainScene.drawForeground(ctx);
 
   // Log draw count (every ~60 frames to avoid spam)
-  if (Math.random() < 0.016) {
-    console.log('Objects drawn this frame:', window.drawnCount);
-  }
+  // if (Math.random() < 0.016) {
+  //   console.log('Objects drawn this frame:', window.drawnCount);
+  // }
 }
 
 // Start the game!

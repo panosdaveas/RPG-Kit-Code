@@ -10,9 +10,16 @@ export class SpriteTextString extends GameObject {
     super({
       // width="768(canvas width)-256(portrait width) / 2" to center horizontally
       // height="432(canvas height)-64(text box height) - 16(bottom-margin)"
-      position: new Vector2(256, 352)
+      position: new Vector2(0, 0)
     });
 
+    this.backdropWidth = 256;
+    this.backdropHeight = 64;
+    const paddingBottom = 16;
+    const canvas = document.querySelector("#game-canvas");
+    console.log(canvas.width, canvas.height);
+    this.position.x = canvas.width/4 - this.backdropWidth/2;
+    this.position.y = canvas.height/2 - this.backdropHeight - paddingBottom;
     // Draw on top layer
     this.drawLayer = "HUD";
 
@@ -51,7 +58,7 @@ export class SpriteTextString extends GameObject {
     // Create background for text
     this.backdrop = new Sprite({
       resource: resources.images.textBox,
-      frameSize: new Vector2(256, 64)
+      frameSize: new Vector2(this.backdropWidth, this.backdropHeight)
     })
 
     // Create a portrait
