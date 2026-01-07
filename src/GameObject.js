@@ -119,7 +119,6 @@ export class GameObject {
     this._mergedCache = this._mergeSortedArrays(this._staticChildren, sortedDynamic);
 
     this._sortedChildrenDirty = false;
-    console.log(this._mergedCache.length);
     return this._mergedCache;
   }
 
