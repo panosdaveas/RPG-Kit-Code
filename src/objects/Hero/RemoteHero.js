@@ -22,6 +22,7 @@ export class RemoteHero extends GameObject {
         super({
             position: new Vector2(x, y)
         });
+        this.isDynamic = true;
 
         this.isSolid = true;
         this.sortingOffsetY = 1; // Match local Hero's sorting offset for consistent Y-sorting

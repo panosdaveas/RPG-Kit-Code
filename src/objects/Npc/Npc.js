@@ -10,6 +10,7 @@ export class Npc extends GameObject {
     super({
       position: new Vector2(x, y)
     });
+    this.isDynamic = true;
 
     // Opt into being solid
     this.isSolid = true;

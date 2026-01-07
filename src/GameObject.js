@@ -10,8 +10,12 @@ export class GameObject {
     this.isSolid = false;
     this.drawLayer = null;
 
-    // Performance optimization: cache sorted children array
-    this._sortedChildrenCache = null;
+    // Performance optimization: separate static and dynamic children
+    // Static children (trees, rocks, buildings) are pre-sorted once
+    // Dynamic children (player, NPCs) are re-sorted when they move
+    this._staticChildren = [];
+    this._dynamicChildren = [];
+    this._mergedCache = null;
     this._sortedChildrenDirty = true;
   }
 
@@ -58,6 +62,44 @@ export class GameObject {
     });
   }
 
+  // Comparator for Y-sorting objects
+  _compareByY(a, b) {
+    if (b.drawLayer === "FLOOR") {
+      return 1;
+    }
+
+    // Use sortingOffsetY if defined, otherwise default to 0
+    const aSortY = a.position.y + (a.sortingOffsetY ?? 0);
+    const bSortY = b.position.y + (b.sortingOffsetY ?? 0);
+
+    // Proper comparison: return 0 when equal for stable sorting
+    if (aSortY < bSortY) return -1;
+    if (aSortY > bSortY) return 1;
+    return 0;
+  }
+
+  // Merge two sorted arrays into one sorted array (O(n+m) instead of O(n log n))
+  _mergeSortedArrays(arr1, arr2) {
+    const result = [];
+    let i = 0, j = 0;
+
+    while (i < arr1.length && j < arr2.length) {
+      if (this._compareByY(arr1[i], arr2[j]) <= 0) {
+        result.push(arr1[i]);
+        i++;
+      } else {
+        result.push(arr2[j]);
+        j++;
+      }
+    }
+
+    // Add remaining elements
+    while (i < arr1.length) result.push(arr1[i++]);
+    while (j < arr2.length) result.push(arr2[j++]);
+
+    return result;
+  }
+
   getDrawChildrenOrdered() {
     // #future #engine #culling #performance
     // OPTIMIZATION TODO: Currently sorting ALL children regardless of viewport visibility.
@@ -65,30 +107,20 @@ export class GameObject {
     // the camera viewport. Culling happens later during render, but we're still sorting
     // off-screen objects unnecessarily.
 
-    // Return cached sorted children if available and not dirty
-    if (this._sortedChildrenCache && !this._sortedChildrenDirty) {
-      return this._sortedChildrenCache;
+    // Return cached merged result if available and not dirty
+    if (this._mergedCache && !this._sortedChildrenDirty) {
+      return this._mergedCache;
     }
 
-    // Rebuild the cache
-    this._sortedChildrenCache = [...this.children].sort((a,b) => {
+    // Sort only the dynamic children (static children are already sorted)
+    const sortedDynamic = [...this._dynamicChildren].sort((a, b) => this._compareByY(a, b));
 
-      if (b.drawLayer === "FLOOR") {
-        return 1;
-      }
+    // Merge pre-sorted static children with newly sorted dynamic children
+    this._mergedCache = this._mergeSortedArrays(this._staticChildren, sortedDynamic);
 
-      // Use sortingOffsetY if defined, otherwise default to 0
-      const aSortY = a.position.y + (a.sortingOffsetY ?? 0);
-      const bSortY = b.position.y + (b.sortingOffsetY ?? 0);
-
-      // Proper comparison: return 0 when equal for stable sorting
-      if (aSortY < bSortY) return -1;
-      if (aSortY > bSortY) return 1;
-      return 0;
-    });
-    // console.log(this._sortedChildrenCache.length);
     this._sortedChildrenDirty = false;
-    return this._sortedChildrenCache;
+    console.log(this._mergedCache.length);
+    return this._mergedCache;
   }
 
   drawImage(ctx, drawPosX, drawPosY) {
@@ -107,10 +139,38 @@ export class GameObject {
   addChild(gameObject) {
     gameObject.parent = this;
     this.children.push(gameObject);
+
+    // Add to appropriate array based on whether object will move
+    // Objects can set this.isDynamic = true in their constructor
+    if (gameObject.isDynamic) {
+      this._dynamicChildren.push(gameObject);
+    } else {
+      // Insert static child in sorted position
+      this._insertSorted(gameObject);
+    }
+
     // Invalidate sorted children cache when children are added
     this._sortedChildrenDirty = true;
     // Invalidate Main's layer cache when scene graph changes
     this.invalidateRootLayerCache();
+  }
+
+  // Insert a static child into the pre-sorted static children array
+  _insertSorted(gameObject) {
+    // Find insertion point using binary search for better performance
+    let low = 0;
+    let high = this._staticChildren.length;
+
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      if (this._compareByY(this._staticChildren[mid], gameObject) < 0) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+
+    this._staticChildren.splice(low, 0, gameObject);
   }
 
   removeChild(gameObject) {
@@ -118,6 +178,11 @@ export class GameObject {
     this.children = this.children.filter(g => {
       return gameObject !== g;
     })
+
+    // Remove from static or dynamic array
+    this._staticChildren = this._staticChildren.filter(g => g !== gameObject);
+    this._dynamicChildren = this._dynamicChildren.filter(g => g !== gameObject);
+
     // Invalidate sorted children cache when children are removed
     this._sortedChildrenDirty = true;
     // Invalidate Main's layer cache when scene graph changes

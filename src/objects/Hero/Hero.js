@@ -27,6 +27,7 @@ export class Hero extends GameObject {
     super({
       position: new Vector2(x, y)
     });
+    this.isDynamic = true;
     
     const shadow = new Sprite({
       resource: resources.images.shadow,
