@@ -11,7 +11,7 @@ export class TiledMap {
         this.walls = new Set(); // For collision
 
         this.tileWidth = 16;
-        this.tileHeight = 32;
+        this.tileHeight = 16;
         this.mapWidth = 0;
         this.mapHeight = 0;
     }
@@ -109,7 +109,7 @@ export class TiledMap {
             // If tile has collide=true, add to walls
             // Otherwise (no collide property or collide=false), remove from walls
             // This way upper layer tiles override lower layer collision
-            if (props && (props.collide || !props.door)) {
+            if (props && props.collide) {
                 this.walls.add(posKey);
             } else {
                 // No collide property = treat as collide:false, override lower layers
