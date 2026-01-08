@@ -16,6 +16,7 @@ import {
     WALK_UP
 } from "./heroAnimations.js";
 import { Highlight } from "../Light/Highlight.js";
+import { moveTowards } from "../../helpers/moveTowards.js";
 
 export class RemoteHero extends GameObject {
     constructor(playerId, x, y) {
@@ -29,6 +30,9 @@ export class RemoteHero extends GameObject {
         this.attributes = new HeroAttributes();
         this.playerId = playerId;
         this.currentLevelId = null;
+
+        // Smooth movement interpolation (matches local Hero)
+        this.destinationPosition = new Vector2(x, y);
 
         // Shadow
         const shadow = new Sprite({
@@ -64,17 +68,22 @@ export class RemoteHero extends GameObject {
         this.addChild(light);
     }
 
-    // Update from network data
-    updateFromNetwork(data) {
-        // Update position
+    step(delta, root) {
+        // Smoothly move toward destination position (same speed as local Hero)
         const oldY = this.position.y;
-        this.position.x = data.x;
-        this.position.y = data.y;
+        moveTowards(this, this.destinationPosition, 1);
 
         // Invalidate parent sorting if Y position changed
         if (oldY !== this.position.y) {
             this.invalidateParentSorting();
         }
+    }
+
+    // Update from network data
+    updateFromNetwork(data) {
+        // Update destination position (smooth interpolation happens in step())
+        this.destinationPosition.x = data.x;
+        this.destinationPosition.y = data.y;
 
         // Update animation if provided
         if (data.animation) {

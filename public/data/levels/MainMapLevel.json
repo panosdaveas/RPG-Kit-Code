@@ -49,7 +49,7 @@
       "portraitFrame": 0,
       "content": [
         {
-          "string": "What a wonderful day at work in the cave!",
+          "string": "What a wonderful day at work!",
           "requires": [],
           "addsFlag": "TALKED_TO_B"
         }

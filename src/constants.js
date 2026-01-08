@@ -136,3 +136,14 @@ export const PERFORMANCE = {
   // Maximum lights before considering canvas pooling
   MAX_LIGHTS_BEFORE_POOLING: 10,
 };
+
+// ============================================================================
+// MULTIPLAYER / NETWORKING
+// ============================================================================
+
+export const MULTIPLAYER = {
+  // Broadcast state every N frames to reduce bandwidth
+  // Lower = more responsive but higher bandwidth
+  // Higher = less bandwidth but potential lag appearance
+  BROADCAST_INTERVAL: 3,  // Broadcast every 3 frames (~20 updates/sec at 60 FPS)
+};

@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
         animation: 'standDown',
         facingDirection: 'DOWN',
         attributes: {}, // Empty attributes initially
-        levelId: 'cave'
+        levelId: 'mainMap'
     });
 
     // Notify all other players about the new player
@@ -42,7 +42,7 @@ io.on('connection', (socket) => {
         animation: 'standDown',
         facingDirection: 'DOWN',
         attributes: {}, // Empty attributes initially
-        levelId: 'cave'
+        levelId: 'mainMap'
     });
 
     // Listen for player state updates

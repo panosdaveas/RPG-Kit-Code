@@ -7,12 +7,6 @@ class Resources {
       rod: "/sprites/rod.png",
       chest: "/sprites/chest.png",
       exit: "/sprites/exit.png",
-      // Outdoor
-      sky: "/sprites/sky.png",
-      ground: "/sprites/ground.png",
-      // Cave
-      cave: "/sprites/cave.png",
-      caveGround: "/sprites/cave-ground.png",
       // NPCs
       knight: "/sprites/knight-sheet-1.png",
       npcOldMan: "/sprites/npcOldMan.png",

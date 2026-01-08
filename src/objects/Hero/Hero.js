@@ -7,6 +7,7 @@ import { resources } from "../../Resource.js";
 import { Animations } from "../../Animations.js";
 import { HeroAttributes } from "./HeroAttributes.js";
 import { FrameIndexPattern } from "../../FrameIndexPattern.js";
+import { MULTIPLAYER } from "../../constants.js";
 import {
   PICK_UP_DOWN,
   STAND_DOWN,
@@ -78,6 +79,10 @@ export class Hero extends GameObject {
     this.directionHeldTime = 0;
     this.lastDirection = null;
     this.movementThreshold = 80; // ms - adjust this value to tune the feel
+
+    // Network optimization: throttle position broadcasts
+    this.broadcastFrameCounter = 0;
+    this.broadcastInterval = MULTIPLAYER.BROADCAST_INTERVAL;
 
     // React to picking up an item
     events.on("HERO_PICKS_UP_ITEM", this, data => {
@@ -178,7 +183,8 @@ export class Hero extends GameObject {
       this.tryMove(root)
     }
 
-    this.tryEmitPosition()
+    this.tryEmitPosition();
+    this.tryBroadcastState();
   }
 
   tryEmitPosition() {
@@ -188,9 +194,15 @@ export class Hero extends GameObject {
     this.lastX = this.position.x;
     this.lastY = this.position.y;
     events.emit("HERO_POSITION", this.position);
+  }
 
-    // Broadcast to multiplayer
-    this.broadcastState();
+  // Broadcast to multiplayer (throttled every N frames)
+  tryBroadcastState() {
+    this.broadcastFrameCounter++;
+    if (this.broadcastFrameCounter >= this.broadcastInterval) {
+      this.broadcastFrameCounter = 0;
+      this.broadcastState();
+    }
   }
 
   tryMove(root) {
@@ -214,9 +226,6 @@ export class Hero extends GameObject {
         this.body.animations.play("standDown");
         this.currentAnimation = 'standDown';
       }
-
-      // Broadcast animation change
-      this.broadcastState();
 
       return;
     }
@@ -269,9 +278,6 @@ export class Hero extends GameObject {
       this.destinationPosition.x = nextX;
       this.destinationPosition.y = nextY;
     }
-
-    // Broadcast animation change immediately
-    this.broadcastState();
   }
 
   onPickUpItem({ image, position }) {

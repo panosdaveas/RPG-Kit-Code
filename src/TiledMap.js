@@ -1,7 +1,7 @@
 export class TiledMap {
     constructor(jsonResource, tilesetResource) {
-        this.jsonResource = jsonResource; // From resources.json.caveMap
-        this.tilesetResource = tilesetResource; // From resources.images.caveTileset
+        this.jsonResource = jsonResource; // From resources.json.mainMap
+        this.tilesetResource = tilesetResource; // From resources.images.mainTileset
 
         this.layers = [];
         this.objects = [];

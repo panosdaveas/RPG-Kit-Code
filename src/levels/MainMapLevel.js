@@ -16,7 +16,7 @@ import { Effects } from "../Effects.js";
 export class MainMapLevel extends Level {
     constructor(params = {}) {
         super({});
-        this.levelId = "cave";
+        this.levelId = "mainMap";
         this.multiplayerEnabled = true; // render remote players here
 
         // Initialize effects from params
@@ -56,7 +56,7 @@ export class MainMapLevel extends Level {
         const npc2 = new Npc(gridCells(38), gridCells(28), {
             content: [
                 {
-                    string: "What a wonderful day at work in the cave!",
+                    string: "What a wonderful day at work!",
                     requires: [],
                     addsFlag: TALKED_TO_B
                 }
