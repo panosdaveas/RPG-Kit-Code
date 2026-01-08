@@ -1,0 +1,46 @@
+{
+  "levelId": "blue-room",
+  "className": "BlueRoom",
+  "multiplayerEnabled": false,
+  "cameraEnabled": false,
+  "tiledMap": {
+    "jsonResource": "blueRoom",
+    "tilesetResource": "blueRoomTileset"
+  },
+  "heroStartPosition": {
+    "x": 560,
+    "y": 400
+  },
+  "heroStartFacing": "UP",
+  "effects": {},
+  "npcs": [
+    {
+      "id": "blue_room_npc",
+      "position": {
+        "gridX": 38,
+        "gridY": 20
+      },
+      "portraitFrame": 1,
+      "content": [
+        {
+          "string": "Hi",
+          "requires": []
+        }
+      ]
+    }
+  ],
+  "items": [],
+  "exits": [
+    {
+      "position": {
+        "gridX": 37,
+        "gridY": 25
+      },
+      "targetLevel": "mainMapLevel",
+      "targetPosition": {
+        "gridX": 25,
+        "gridY": 23
+      }
+    }
+  ]
+}

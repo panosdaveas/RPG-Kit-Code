@@ -182,6 +182,9 @@ export class GameObject {
     this._staticChildren = this._staticChildren.filter(g => g !== gameObject);
     this._dynamicChildren = this._dynamicChildren.filter(g => g !== gameObject);
 
+    // Clear parent reference
+    gameObject.parent = null;
+
     // Invalidate sorted children cache when children are removed
     this._sortedChildrenDirty = true;
     // Invalidate Main's layer cache when scene graph changes

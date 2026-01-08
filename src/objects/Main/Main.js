@@ -233,15 +233,13 @@ export class Main extends GameObject {
     if (this.level) {
       // Remove hero from old level
       if (this.hero.parent === this.level) {
-        this.level.children = this.level.children.filter(c => c !== this.hero);
-        this.hero.parent = null;
+        this.level.removeChild(this.hero);
       }
 
       // Remove remote players from old level
       this.remotePlayers.forEach(remoteHero => {
         if (remoteHero.parent === this.level) {
-          this.level.children = this.level.children.filter(c => c !== remoteHero);
-          remoteHero.parent = null;
+          this.level.removeChild(remoteHero);
         }
       });
       this.level.destroy();
@@ -325,10 +323,13 @@ export class Main extends GameObject {
     const isInLevel = (remoteHero.parent === this.level);
 
     if (shouldBeInLevel && !isInLevel) {
+      // Clean remove from any stale parent first
+      if (remoteHero.parent) {
+        remoteHero.parent.removeChild(remoteHero);
+      }
       this.level.addChild(remoteHero);
     } else if (!shouldBeInLevel && isInLevel) {
-      this.level.children = this.level.children.filter(c => c !== remoteHero);
-      remoteHero.parent = null;
+      this.level.removeChild(remoteHero);
     }
   }
 

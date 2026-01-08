@@ -40,6 +40,69 @@ Conclusion: The static/dynamic split already eliminated 97% of sorting work.
 Don't optimize further unless profiling proves it's slow.
 
 ---
+🎮 DATA-DRIVEN LEVEL ARCHITECTURE
+
+Implemented: 2026-01-08
+
+Overview:
+Levels now use JSON configuration files instead of hardcoded entities. This separates
+content (NPCs, items, dialogs) from code (level logic), enabling easier maintenance
+and future visual editors.
+
+Architecture:
+```
+public/data/levels/          ← Level JSON configurations
+  ├── MainMapLevel.json       ← Example: NPCs, items, exits
+  └── README.md               ← Full documentation
+
+src/LevelFactory.js           ← Factory creates levels from JSON
+src/levels/MainMapLevel.js    ← Refactored to use factory pattern
+```
+
+Benefits:
+✅ Designers can edit content without touching JavaScript
+✅ Foundation for visual level editor
+✅ Hot-reloadable (edit JSON, refresh browser)
+✅ Version control friendly (clear diffs)
+✅ Easier to maintain and balance
+
+Before (hardcoded in JS):
+```javascript
+const npc1 = new Npc(gridCells(49), gridCells(20), {
+  content: [{ string: "Hello!", requires: [] }],
+  portraitFrame: 1
+});
+this.addChild(npc1);
+```
+
+After (data-driven):
+```json
+{
+  "npcs": [{
+    "position": {"gridX": 49, "gridY": 20},
+    "content": [{"string": "Hello!", "requires": []}],
+    "portraitFrame": 1
+  }]
+}
+```
+
+The LevelFactory reads JSON and instantiates entities automatically.
+
+Usage:
+1. Add level JSON to Resource.js: mainMapLevel: "/data/levels/MainMapLevel.json"
+2. Create level: LevelFactory.createFromJSON(resources.json.mainMapLevel.data)
+3. Add new entity types: LevelFactory.registerEntityType('Sword', SwordClass)
+
+See public/data/levels/README.md for complete documentation.
+
+#future #editor #tooling
+Next steps:
+- Visual level editor (drag-drop entities)
+- JSON schema validation
+- Level templates and prefabs
+- Hot-reloading without refresh
+
+---
 # Find all future enhancements
   grep -r "#future" src/
 
@@ -207,7 +270,7 @@ Don't optimize further unless profiling proves it's slow.
     y: 400,                   // ~4 bytes
     animation: 'walkDown',    // ~15 bytes
     facingDirection: 'DOWN',  // ~8 bytes
-    levelId: 'cave'          // ~10 bytes
+    levelId: 'mainMap'          // ~10 bytes
   }
   // Total: ~61 bytes per update
 

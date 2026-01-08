@@ -1,0 +1,88 @@
+{
+  "levelId": "mainMap",
+  "className": "MainMapLevel",
+  "multiplayerEnabled": true,
+  "tiledMap": {
+    "jsonResource": "mainMap",
+    "tilesetResource": "mainMapTileset"
+  },
+  "heroStartPosition": {
+    "x": 560,
+    "y": 400
+  },
+  "heroStartFacing": "DOWN",
+  "effects": {
+    "timeOfDay": "night",
+    "rain": false
+  },
+  "npcs": [
+    {
+      "id": "grumpy_worker",
+      "position": {
+        "gridX": 49,
+        "gridY": 20
+      },
+      "portraitFrame": 1,
+      "content": [
+        {
+          "string": "I just can't stand that guy.",
+          "requires": ["TALKED_TO_B"],
+          "bypass": ["TALKED_TO_A"],
+          "addsFlag": "TALKED_TO_A"
+        },
+        {
+          "string": "He is just the worst!",
+          "requires": ["TALKED_TO_A"]
+        },
+        {
+          "string": "Grumble grumble. Another day at work.",
+          "requires": []
+        }
+      ]
+    },
+    {
+      "id": "cheerful_worker",
+      "position": {
+        "gridX": 38,
+        "gridY": 28
+      },
+      "portraitFrame": 0,
+      "content": [
+        {
+          "string": "What a wonderful day at work in the cave!",
+          "requires": [],
+          "addsFlag": "TALKED_TO_B"
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "type": "Rod",
+      "position": {
+        "gridX": 37,
+        "gridY": 25
+      }
+    },
+    {
+      "type": "Chest",
+      "position": {
+        "gridX": 34,
+        "gridY": 25
+      }
+    }
+  ],
+  "exits": [
+    {
+      "position": {
+        "gridX": 25,
+        "gridY": 22.5
+      },
+      "targetLevel": "blueRoomLevel",
+      "targetPosition": {
+        "gridX": 37,
+        "gridY": 24
+      }
+    }
+  ]
+}
