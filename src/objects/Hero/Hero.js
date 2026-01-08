@@ -130,7 +130,6 @@ export class Hero extends GameObject {
       })
       if (objAtPosition) {
         events.emit("HERO_REQUESTS_ACTION", objAtPosition);
-        console.log(this.attributes.getAll());
         console.log(objAtPosition);
       }
 

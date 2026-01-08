@@ -14,6 +14,7 @@ export class Npc extends GameObject {
 
     // Opt into being solid
     this.isSolid = true;
+    this.sortingOffsetY = 1; // Offset for proper Y-sorting (matches Hero)
 
     // Say something when talking
     this.textContent = textConfig.content;
