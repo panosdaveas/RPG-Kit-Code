@@ -26,7 +26,7 @@ class Resources {
 
     // JSON maps to download
     this.toLoadJson = {
-      mainMap: "/maps/main_map_16x16.json",
+      mainMap: "/maps/mainmap.json",
       blueRoom: "/maps/room_blue.json",
     };
 

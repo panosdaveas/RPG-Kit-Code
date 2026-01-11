@@ -147,3 +147,22 @@ export const MULTIPLAYER = {
   // Higher = less bandwidth but potential lag appearance
   BROADCAST_INTERVAL: 3,  // Broadcast every 3 frames (~20 updates/sec at 60 FPS)
 };
+
+// ============================================================================
+// CHUNK SYSTEM (for large maps)
+// ============================================================================
+
+export const CHUNK = {
+  // Chunk dimensions in tiles
+  TILES_WIDTH: 64,   // 64 tiles = 1024px wide
+  TILES_HEIGHT: 64,  // 64 tiles = 1024px tall
+
+  // Loading margin: how many chunks to load beyond visible viewport
+  // 1 = 3x3 grid (current chunk + 1 in each direction)
+  // 2 = 5x5 grid (current chunk + 2 in each direction)
+  LOAD_MARGIN: 1,
+
+  // Chunk storage path (relative to root)
+  CHUNKS_PATH: 'public/maps/chunks/',
+  MASTER_FILE: 'master.json',
+};
