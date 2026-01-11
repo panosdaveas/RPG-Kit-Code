@@ -1,5 +1,5 @@
 import { Chunk } from "./objects/Chunk/Chunk.js";
-import { CHUNK, DISPLAY } from "./constants.js";
+import { CHUNK, DISPLAY } from "./Constants.js";
 
 /**
  * ChunkManager - Manages loading and unloading of map chunks

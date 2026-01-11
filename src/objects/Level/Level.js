@@ -1,8 +1,8 @@
-import {GameObject} from "../../GameObject.js";
-import {TileSprite} from "../TileSprite/TileSprite.js";
-import {Effects} from "../../Effects.js";
-import {ChunkManager} from "../../ChunkManager.js";
-import {CHUNK} from "../../constants.js";
+import { GameObject } from "../../GameObject.js";
+import { TileSprite } from "../TileSprite/TileSprite.js";
+import { Effects } from "../../Effects.js";
+import { ChunkManager } from "../../ChunkManager.js";
+import { CHUNK } from "../../Constants.js";
 
 /**
  * #architecture #engine #performance

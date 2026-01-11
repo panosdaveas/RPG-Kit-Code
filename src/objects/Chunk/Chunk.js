@@ -1,6 +1,6 @@
 import { GameObject } from "../../GameObject.js";
 import { TileSprite } from "../TileSprite/TileSprite.js";
-import { CULLING, TILE } from "../../constants.js";
+import { CULLING, TILE } from "../../Constants.js";
 
 /**
  * Chunk - Represents a single chunk of the game world
