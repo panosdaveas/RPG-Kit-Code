@@ -26,4 +26,4 @@ dist-ssr
 .claude
 .vscode
 node_modules
-public/maps/chunks/*
+public/maps/chunks/

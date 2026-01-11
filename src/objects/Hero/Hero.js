@@ -7,7 +7,7 @@ import { resources } from "../../Resource.js";
 import { Animations } from "../../Animations.js";
 import { HeroAttributes } from "./HeroAttributes.js";
 import { FrameIndexPattern } from "../../FrameIndexPattern.js";
-import { MULTIPLAYER } from "../../constants.js";
+import { MULTIPLAYER } from "../../Constants.js";
 import {
   PICK_UP_DOWN,
   STAND_DOWN,
